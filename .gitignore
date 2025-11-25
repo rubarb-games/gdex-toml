@@ -1,1 +1,8 @@
 .idea/
+*.vcxproj
+*.vcxproj.filters
+cmake_install.cmake
+*.sln
+.editorconfig
+godot-toml/addons/gdex_toml/**/*.dll
+CMakeFiles/
