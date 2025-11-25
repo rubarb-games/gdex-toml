@@ -1,0 +1,26 @@
+[game_config]
+board_size            = [8, 8] # dimension of the board in tiles
+start_cards           = 7       # number of cards each player starts with
+start_cash            = 25000   # amount of cash each player starts with
+
+# styling
+player_colors = ["45FFA6", "45B1FF", "A245FF", "FF4588", "FF7245", "FFD645"]
+
+board_tiles = [
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+]
+
+[opponent.1]
+id = "archie"
+script = "res://scripts/opponents/archie.gd"
+
+[opponent.2]
+id = "jacqueline"
+script = "res://scripts/opponents/jacqueline.gd"
