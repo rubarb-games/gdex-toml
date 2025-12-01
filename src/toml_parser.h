@@ -20,13 +20,16 @@ protected:
 
 public:
     TomlParser();
-    ~TomlParser();
+    ~TomlParser() override;
 
     bool try_parse(const String &p_content);
     String get_str(const String &p_key);
     Array get_arr(const String &p_key);
     Dictionary get_section(const String &p_section_name);
     Array get_tables(const String &p_key);
+
+    static String format(const String &p_label, const Variant &p_value);
+    static String format_table(const String &p_label, const Dictionary &p_dict);
 };
 
 #endif

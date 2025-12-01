@@ -23,6 +23,21 @@ func _ready() -> void:
 	print("Start cash: "+str(start_cash))
 	print("Start cards: "+str(start_cards))
 	print("Player colors: "+str(player_colors))
+	
+	#var arr: Array = [1,7,0,4]
+	#var toml_str: String = toml_parser.format(arr)
+	#write to file
+	var toml_str: String = TomlParser.format("something", 1704)
+	print(toml_str)
+	var tbl: Dictionary = {
+		"int": 123,
+		"float": 1.3,
+		"bool": true,
+		"string": "hello!",
+		"arr": [1, 2.4, "something", false],
+	}
+	var tbl_str: String = TomlParser.format_table("table", tbl)
+	print(tbl_str)
 
 static func load_toml_file(p_parser: TomlParser, p_paths: Array) -> int:
 	for path in p_paths:

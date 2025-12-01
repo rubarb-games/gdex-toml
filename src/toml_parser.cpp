@@ -1,10 +1,7 @@
 ﻿#include "toml_parser.h"
 #include "../include/toml.hpp"
 
-#include <godot_cpp/classes/engine.hpp>
-#include <godot_cpp/variant/utility_functions.hpp>
-#include "godot_cpp/core/class_db.hpp"
-// #include <godot_cpp/variant/dictionary.hpp>
+#include <godot_cpp/core/class_db.hpp>
 
 using namespace godot;
 
@@ -14,6 +11,8 @@ void TomlParser::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_arr", "p_key"), &TomlParser::get_arr);
     ClassDB::bind_method(D_METHOD("get_section", "p_key"), &TomlParser::get_section);
     ClassDB::bind_method(D_METHOD("get_tables", "p_key"), &TomlParser::get_tables);
+    ClassDB::bind_static_method("TomlParser", D_METHOD("format", "p_label", "p_value"), &TomlParser::format);
+    ClassDB::bind_static_method("TomlParser", D_METHOD("format_table", "p_label", "p_dict"), &TomlParser::format_table);
 }
 
 TomlParser::TomlParser() = default;
@@ -145,4 +144,48 @@ Dictionary TomlParser::to_dictionary(const toml::value &val) {
         }
     }
     return dic;
+}
+
+String TomlParser::format(const String &p_label, const Variant &p_value) {
+    const toml::value val = toml::table{ {to_str(p_label), to_str(p_value)}};
+    return {toml::format(val).c_str()};
+}
+
+String TomlParser::format_table(const String &p_label, const Dictionary &p_dict) {
+    toml::value tbl = toml::table{};
+    for (const auto& key : p_dict.keys()) {
+        std::string key_str = to_str(key.stringify());
+        const Variant& val = p_dict[key];
+        if (val.get_type() == Variant::BOOL) {
+            tbl[key_str] = toml::value{val.booleanize()};
+        }
+        if (val.get_type() == Variant::INT) {
+            tbl[key_str] = toml::value{static_cast<int>(val)};
+        }
+        if (val.get_type() == Variant::FLOAT) {
+            tbl[key_str] = toml::value{static_cast<float>(val)};
+        }
+        if (val.get_type() == Variant::STRING) {
+            tbl[key_str] = toml::value{to_str(val.stringify())};
+        }
+        if (val.get_type() == Variant::ARRAY) {
+            std::vector<toml::value> vec = {};
+            for (const Array& a = p_dict[key]; const auto & av : a) {
+                if (av.get_type() == Variant::BOOL) {
+                    vec.emplace_back(av.booleanize());
+                }
+                if (val.get_type() == Variant::INT) {
+                    vec.emplace_back(static_cast<int>(av));
+                }
+                if (val.get_type() == Variant::FLOAT) {
+                    vec.emplace_back(static_cast<float>(av));
+                }
+                if (val.get_type() == Variant::STRING) {
+                    vec.emplace_back(to_str(av));
+                }
+            }
+            tbl[key_str] = toml::value{vec};
+        }
+    }
+    return {toml::format(tbl).c_str()};
 }
