@@ -24,24 +24,38 @@ func _ready() -> void:
 	print("Start cards: "+str(start_cards))
 	print("Player colors: "+str(player_colors))
 	
-	#var arr: Array = [1,7,0,4]
-	#var toml_str: String = toml_parser.format(arr)
-	#write to file
-	var toml_str: String = TomlParser.format("something", 1704)
-	print(toml_str)
-	var tbl: Dictionary = {
-		"int": 123,
-		"float": 1.3,
-		"bool": true,
-		"string": "hello!",
-		"arr": [1, 2.4, "something", false],
-	}
-	var tbl_str: String = TomlParser.format_table("table", tbl)
-	print(tbl_str)
+	print("\nTomlWriter ===================\n")
+	#var toml_str: String = TomlParser.format("something", 1704)
+	#print(toml_str)
+	#var tbl: Dictionary = {
+		#"int": 123,
+		#"float": 1.3,
+		#"bool": true,
+		#"string": "hello!",
+		#"arr": [1, 2.4, "something", false],
+	#}
+	#var tbl_str: String = TomlParser.format_table("table", tbl)
+	#print(tbl_str)
 	
-	var toml_writer: TomlWriter = TomlWriter.new()
-	toml_writer.add_int("my_int", 1704)
-	var s: String = toml_writer.write_to_string()
+	var tw: TomlWriter = TomlWriter.new()
+	tw.add_int("my_int", 1704)
+	tw.add_int("my_int", 1024)
+	tw.add_color("color", Color.BROWN)
+	tw.add_vector2("vec2", Vector2(0.5, 0.85))
+	tw.add_vector2i("vec2i", Vector2i(5, 85))
+	tw.add_variant("variant", true)
+	tw.add_array("arr", ["hei", 1.0, 2, false, Vector2(0.25, 0.9)])
+	tw.add_int_to_section("my-section", "some_int", 1704)
+	tw.add_dictionary("dict1", {
+		"hello": "world",
+		"nested": { "whatever": true },
+		"arr_dict": [{ "key": true }, { "key": false }]
+	})
+	tw.add_int_to_section("my-section", "other_int", 1802)
+	tw.add_bool_to_section("my-section", "doodad", false)
+	tw.format_array("arr", TomlWriter.ArrayFormat.AF_ONELINE)
+	tw.format_table("dict1", TomlWriter.TF_MULTILINE, 0, 0, 0, TomlWriter.IC_SPACE)
+	var s: String = tw.serialize()
 	print(s)
 
 static func load_toml_file(p_parser: TomlParser, p_paths: Array) -> int:

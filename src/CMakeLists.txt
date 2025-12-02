@@ -1,5 +1,6 @@
 ﻿target_sources( ${PROJECT_NAME}
     PRIVATE
+        translations.h
         toml_parser.h
         toml_parser.cpp
         toml_writer.h

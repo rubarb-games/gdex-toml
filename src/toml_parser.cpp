@@ -107,6 +107,9 @@ Dictionary TomlParser::to_dictionary(const toml::value &val) {
         auto label = String(k.c_str());
 //        godot::UtilityFunctions::print("key: " + label);
 
+
+// TODO: Don't cast to variant. cast to correct type
+
         if (v.is_boolean()) {
             dic[label] = Variant(v.as_boolean());
         }
