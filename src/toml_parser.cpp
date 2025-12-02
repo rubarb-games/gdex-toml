@@ -1,9 +1,6 @@
 ﻿#include "toml_parser.h"
-
 #include <array>
-
 #include "../include/toml.hpp"
-
 #include <godot_cpp/core/class_db.hpp>
 
 using namespace godot;

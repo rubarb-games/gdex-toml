@@ -38,6 +38,11 @@ func _ready() -> void:
 	}
 	var tbl_str: String = TomlParser.format_table("table", tbl)
 	print(tbl_str)
+	
+	var toml_writer: TomlWriter = TomlWriter.new()
+	toml_writer.add_int("my_int", 1704)
+	var s: String = toml_writer.write_to_string()
+	print(s)
 
 static func load_toml_file(p_parser: TomlParser, p_paths: Array) -> int:
 	for path in p_paths:

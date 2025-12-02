@@ -18,7 +18,9 @@ if (NOT TARGET godot-cpp)
 endif()
 set( GODOT_CPP_SYSTEM_HEADERS ON CACHE BOOL "" FORCE )
 
-add_library(${PROJECT_NAME} SHARED)
+add_library(${PROJECT_NAME} SHARED
+        src/toml_writer.cpp
+        src/toml_writer.h)
 add_subdirectory(src)
 include_directories(include)
 
