@@ -4,5 +4,6 @@
 cmake_install.cmake
 *.sln
 .editorconfig
-godot-toml/addons/gdex_toml/**/*.dll
+godot-project/addons/gdex_toml/**/*
 CMakeFiles/
+dummy.exe

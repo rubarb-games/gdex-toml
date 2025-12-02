@@ -1,4 +1,7 @@
 ﻿#include "toml_parser.h"
+
+#include <array>
+
 #include "../include/toml.hpp"
 
 #include <godot_cpp/core/class_db.hpp>
@@ -169,23 +172,64 @@ String TomlParser::format_table(const String &p_label, const Dictionary &p_dict)
             tbl[key_str] = toml::value{to_str(val.stringify())};
         }
         if (val.get_type() == Variant::ARRAY) {
-            std::vector<toml::value> vec = {};
+            // #ifdef DEBUG_TOML
+            // UtilityFunctions::print("array");
+            // #endif
+            toml::array arr;
+            std::vector<toml::value> vec;
             for (const Array& a = p_dict[key]; const auto & av : a) {
+                #ifdef DEBUG_TOML
+                UtilityFunctions::print(av.stringify());
+                #endif
+                // vec.emplace_back(to_str(av.stringify()));
                 if (av.get_type() == Variant::BOOL) {
+
                     vec.emplace_back(av.booleanize());
+                    arr.emplace_back(av.booleanize());
                 }
                 if (val.get_type() == Variant::INT) {
                     vec.emplace_back(static_cast<int>(av));
+                    arr.emplace_back(static_cast<int>(av));
                 }
                 if (val.get_type() == Variant::FLOAT) {
                     vec.emplace_back(static_cast<float>(av));
+                    arr.emplace_back(static_cast<float>(av));
                 }
                 if (val.get_type() == Variant::STRING) {
                     vec.emplace_back(to_str(av));
+                    arr.emplace_back(to_str(av));
                 }
+                // Variant::COLOR
             }
-            tbl[key_str] = toml::value{vec};
+            #ifdef DEBUG_TOML
+            std::string vec_size = "vec size: ";
+            vec_size.append(std::to_string(vec.size()));
+            UtilityFunctions::print(vec_size.c_str());
+            #endif
+            // tbl[key_str] = toml::value{std::move(vec)};
+            tbl[key_str] = std::move(vec);
+            // tbl["ttt"] = arr;
+            toml::value x = toml::table{{"dd", 1}};
         }
+
+        // tbl.emplace({"haha", "hoho"});
+        // toml::array aa = {"hola", 1.0};
+        // tbl.emplace_back(std::move(aa));
     }
+
+    // create instance of TomlWriter, keeps an instance of a value
+    toml::value test(toml::table{});
+    // add_int/float/string/color(name, val)
+    test["thomas"] = toml::value{"viktil"};
+    // add_section(name, dict)
+    test["blabla"] = toml::table{
+        {"a", 42},
+        {"b", "foo"},
+    };
+
+    String test_str = String(toml::format(test).c_str());
+    UtilityFunctions::print("test_str");
+    UtilityFunctions::print(test_str);
+
     return {toml::format(tbl).c_str()};
 }
