@@ -3,8 +3,8 @@
         translations.h
         toml_parser.h
         toml_parser.cpp
-        toml_writer.h
-        toml_writer.cpp
+        toml_creator.h
+        toml_creator.cpp
         register_types.h
         register_types.cpp
 )

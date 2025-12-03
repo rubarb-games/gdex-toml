@@ -1,3 +1,24 @@
+sample_string = "something something æøå"
+sample_int = 9876
+int_arr = [1,2,3]
+float_arr = [0.25, 1.3334, 1.0]
+string_arr = ["a", "b", "c"]
+col = "ff9900"
+
+[table]
+my_str = "table.my_str"
+my_strings = ["a", "b", "c", "d"]
+
+[my_table]
+yes = true
+vectors = [
+	[1,2],
+	[2,4],
+]
+
+[my_table.abc]
+thomas = "viktil"
+
 [game_config]
 board_size            = [8, 8] # dimension of the board in tiles
 start_cards           = 7       # number of cards each player starts with

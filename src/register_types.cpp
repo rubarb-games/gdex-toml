@@ -7,7 +7,7 @@
 #include <godot_cpp/godot.hpp>
 
 #include "toml_parser.h"
-#include "toml_writer.h"
+#include "toml_creator.h"
 
 using namespace godot;
 
@@ -17,7 +17,7 @@ void initialize_toml_parser(const ModuleInitializationLevel p_level) {
 	}
 
 	ClassDB::register_class<TomlParser>();
-	ClassDB::register_class<TomlWriter>();
+	ClassDB::register_class<TomlCreator>();
 }
 
 void uninitialize_toml_parser(const ModuleInitializationLevel p_level) {
