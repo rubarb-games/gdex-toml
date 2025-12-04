@@ -1,6 +1,7 @@
 ﻿#ifndef GDEX_TOML_TRANSLATIONS_H
 #define GDEX_TOML_TRANSLATIONS_H
 #include "toml.hpp"
+#include "godot_cpp/variant/utility_functions.hpp"
 #include "godot_cpp/variant/variant.hpp"
 
 using namespace godot;
@@ -91,15 +92,31 @@ inline toml::value enc(const Variant &p_value) {
 }
 
 inline int dec_int(const toml::value &p_val) {
+    #ifdef DEBUG_TOML
+    if (!p_val.is_integer()) {
+        UtilityFunctions::print("[ERROR] dec_int : Value is not an integer");
+
+    }
+    #endif
     return static_cast<int>(p_val.as_integer());
 }
 
 inline float dec_float(const toml::value &p_val) {
+    #ifdef DEBUG_TOML
+    if (!p_val.is_floating()) {
+        UtilityFunctions::print("[ERROR] dec_float : Value is not a float");
+    }
+    #endif
     return static_cast<float>(p_val.as_floating());
 }
 
 inline String dec_string(const toml::value &p_val) {
-    return String(p_val.as_string().c_str());
+    #ifdef DEBUG_TOML
+    if (!p_val.is_string()) {
+        UtilityFunctions::print("[ERROR] dec_string : Value is not a string");
+    }
+    #endif
+    return {p_val.as_string().c_str()};
 }
 
 #endif //GDEX_TOML_TRANSLATIONS_H

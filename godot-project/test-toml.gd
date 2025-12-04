@@ -12,12 +12,12 @@ func _ready() -> void:
 		print("Failed to load sample file from "+path)
 		return
 
-	p("default_moves", toml.get_int_at(["gameplay", "default_moves"]))
-	p("default_gravel_per_tile", toml.get_int_at(["gameplay", "default_gravel_per_tile"]))
-	
-	p("map_cols", toml.get_int_at(["map", "map_cols"]))
-	p("map_rows", toml.get_int_at(["map", "map_rows"]))
-	p("map_tile_size", toml.get_float_at(["map", "map_tile_size"]))
+	#p("default_moves", toml.get_int_at(["gameplay", "default_moves"]))
+	#p("default_gravel_per_tile", toml.get_int_at(["gameplay", "default_gravel_per_tile"]))
+	#
+	#p("map_cols", toml.get_int_at(["map", "map_cols"]))
+	#p("map_rows", toml.get_int_at(["map", "map_rows"]))
+	p("map_tile_size", toml.get_int_at(["map", "map_tile_size"]))
 	
 	#resource_coal   = toml.get_int_arr_at(["levels", "coal"])
 	#resource_copper = toml.get_int_arr_at(["levels", "copper"])
