@@ -1,59 +1,48 @@
 extends Node
 
+func p(prefix: String, val: Variant) -> void:
+	print("%s : %s" % [prefix, str(val)])
+
 func _ready() -> void:
 	print("\nTomlParser ===================\n")
 
-	var toml_parser: TomlParser = TomlParser.new()
+	var toml: TomlParser = TomlParser.new()
 	var path: String = "res://sample.toml"
-	if load_toml_file(toml_parser, [path]) != OK:
+	if load_toml_file(toml, [path]) != OK:
 		print("Failed to load sample file from "+path)
 		return
 
-	print(toml_parser.get_string("sample_string"))
-	print(toml_parser.get_string_or("sample_stringx", "blæ"))
-	print(toml_parser.get_string_at(["table", "my_str"]))
-	print(toml_parser.get_string_arr_at(["table", "my_strings"]))
+	p("default_moves", toml.get_int_at(["gameplay", "default_moves"]))
+	p("default_gravel_per_tile", toml.get_int_at(["gameplay", "default_gravel_per_tile"]))
 	
-	print(toml_parser.get_color("col"))
+	p("map_cols", toml.get_int_at(["map", "map_cols"]))
+	p("map_rows", toml.get_int_at(["map", "map_rows"]))
+	p("map_tile_size", toml.get_float_at(["map", "map_tile_size"]))
 	
-	print(toml_parser.get_table("table"))
-	print(toml_parser.get_table_at(["my_table", "abc"]))
-	print(toml_parser.get_int_arr_at(["game_config", "board_size"]))
-	print(toml_parser.get_vec2i_at(["game_config", "board_size"]))
-
-	#print(toml_parser.get_int("sample_int"))
-	#print(toml_parser.get_int_or("sample_intx", -1))
-	#var arr_ints: Array[int] = toml_parser.get_array_int("int_arr")
-	#print(arr_ints)
-	#var arr_floats: Array[float] = toml_parser.get_array_float("float_arr")
-	#print(arr_floats)
-	#var arr_strings: Array[String] = toml_parser.get_array_string("string_arr")
-	#print(arr_strings)
+	#resource_coal   = toml.get_int_arr_at(["levels", "coal"])
+	#resource_copper = toml.get_int_arr_at(["levels", "copper"])
+	#resource_gold   = toml.get_int_arr_at(["levels", "gold"])
+	#monster_spider  = toml.get_int_arr_at(["levels", "spider"])
 	#
-	#var truths: Dictionary = toml_parser.get_table("my_table")
-	#print(truths)
+	#health_coal   = toml.get_int_at(["levels", "health_coal"])
+	#health_copper = toml.get_int_at(["levels", "health_copper"])
+	#health_gold   = toml.get_int_at(["levels", "health_gold"])
 	#
-	#var vec2s: Array[Vector2i] = toml_parser.get_array_vector2i(["my_table", "vectors"])
-	#print(vec2s)
-	
-	#var table: Dictionary = toml_parser.get_table("opponent")
+	#var levelnames: Dictionary = toml.get_table("level_name")
+	#for key: String in levelnames:
+		#if key == "default":
+			#level_names[key] = levelnames[key]
+		#else:
+			#level_names[int(key)] = levelnames[key]
+	#
+	#bomb_handlers = toml.get_string_arr_at(["bombs", "handlers"])
+	#
+	#volume_master = ObservableInt.new(toml.get_int_at(["audio", "volume_master"]))
+	#volume_music = ObservableInt.new(toml.get_int_at(["audio", "volume_music"]))
+	#volume_sfx = ObservableInt.new(toml.get_int_at(["audio", "volume_sfx"]))
+	#
+	#display_fullscreen = ObservableBool.new(toml.get_bool_at(["display", "fullscreen"]))
 
-	# get game_config section
-	#var game_config: Dictionary = toml_parser.get_section("game_config")
-	##var board_size: Array = toml_parser.get_arr("game_config.board_size")
-	#var board_size: Array = game_config["board_size"] as Array
-	#var start_cards: int = game_config["start_cards"] as int
-	#var start_cash: int = game_config["start_cash"] as int
-#
-	#var player_colors: Array[Color]
-	#for color in game_config["player_colors"]:
-		#player_colors.append(Color(color as String))
-#
-	#print("GameConfig keys: "+str(game_config.size()))
-	#print("Board size: "+str(board_size))
-	#print("Start cash: "+str(start_cash))
-	#print("Start cards: "+str(start_cards))
-	#print("Player colors: "+str(player_colors))
 	
 	print("\nTomlCreator ===================\n")
 

@@ -14,8 +14,10 @@ private:
 
     static void to_dictionary(const toml::basic_value<toml::type_config> &p_table, Dictionary &p_dict);
     static void to_array(const toml::basic_value<toml::type_config> &p_value, Array &p_array);
-    static std::vector<std::string> keys_to_vec(const Array &p_keys);
     [[nodiscard]] toml::value find_recursive(const Array &p_keys) const;
+
+    template<class T>
+    TypedArray<T> FIND_TYPED_ARR(const Array &p_keys) const;
 
 protected:
     static void _bind_methods();
@@ -35,6 +37,9 @@ public:
     int get_int_or(const String &p_key, int p_default_value) const;
     int get_int_at(const Array &p_keys) const;
     TypedArray<int> get_int_arr_at(const Array &p_keys) const;
+
+    template<class T>
+    T FIND_RECURSIVE(const Array &p_keys, T p_return_val);
 
     float get_float(const String &p_key) const;
     float get_float_or(const String &p_key, float p_default_value) const;

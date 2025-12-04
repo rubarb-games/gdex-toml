@@ -90,4 +90,16 @@ inline toml::value enc(const Variant &p_value) {
     return {"[Could not find encoder for variant]"};
 }
 
+inline int dec_int(const toml::value &p_val) {
+    return static_cast<int>(p_val.as_integer());
+}
+
+inline float dec_float(const toml::value &p_val) {
+    return static_cast<float>(p_val.as_floating());
+}
+
+inline String dec_string(const toml::value &p_val) {
+    return String(p_val.as_string().c_str());
+}
+
 #endif //GDEX_TOML_TRANSLATIONS_H

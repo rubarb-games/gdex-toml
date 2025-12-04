@@ -1,47 +1,56 @@
-sample_string = "something something æøå"
-sample_int = 9876
-int_arr = [1,2,3]
-float_arr = [0.25, 1.3334, 1.0]
-string_arr = ["a", "b", "c"]
-col = "ff9900"
+[audio]
+volume_master = 0
+volume_sfx = 0
+volume_music = 0
 
-[table]
-my_str = "table.my_str"
-my_strings = ["a", "b", "c", "d"]
+[display]
+fullscreen = false
 
-[my_table]
-yes = true
-vectors = [
-	[1,2],
-	[2,4],
+[gameplay]
+default_moves = 10
+default_gravel_per_tile = 1
+
+[map]
+map_cols = 9
+map_rows = 12
+map_tile_size = 1.0
+
+[levels]
+
+# Resources
+# level       1            5                   10                  15               20               25             30                 35                 40
+coal       = [2, 3, 4,  3,  6,  5,  6,  7,  2,  1,  0,  4,  5,  2,  3,  3, 2, 2, 4, 6, 8, 10, 10, 8, 6, 4, 4, 6, 6, 8, 10, 12, 14, 16, 18, 20, 10, 8, 12, 14]
+copper     = [0, 0, 0,  1,  2,  1,  2,  1,  4,  6,  2,  0,  0,  0,  1,  0, 6, 7, 8, 4, 2,  1,  1, 2, 4, 2, 7, 5, 5, 8,  0,  1,  1,  1,  0,  3,  4, 3,  6,  7]
+gold       = [0, 0, 0,  0,  0,  0,  0,  0,  0,  1,  1,  2,  1,  3,  1,  2, 0, 0, 4, 3, 0,  1,  2, 4, 2, 1, 0, 1, 3, 5,  7,  5,  3,  1,  3,  1,  0, 2,  3,  4]
+
+# Monsters
+# level       1            5                   10                  15               20               25             30                 35                 40
+spider     = [0, 1, 1,  0,  1,  2,  4,  4,  3,  5,  4,  4,  5,  5,  0,  0, 0, 0, 0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 1, 2,  2,  2,  3,  1,  3,  1,  0, 2,  3,  4]
+
+health_coal = 1
+health_copper = 2
+health_gold = 2
+
+[level_names]
+# Default name uses the level number +1 
+default = "Depth %d"
+0  = "Into the depths"
+5  = "Can you dig it?"
+10 = "Dirty hands"
+15 = "Loads of coal"
+20 = "There be gold"
+
+[bombs]
+handlers = [
+	"line", 
+	"standard", 
+	"escalator", 
+	"exotic", 
+	"fizzle", 
+	"swapdirection", 
+	"crossswap", 
+	"delayedblast", 
+	"squareswap", 
+	"colorswap", 
+	"oreblaster"
 ]
-
-[my_table.abc]
-thomas = "viktil"
-
-[game_config]
-board_size            = [8, 8] # dimension of the board in tiles
-start_cards           = 7       # number of cards each player starts with
-start_cash            = 25000   # amount of cash each player starts with
-
-# styling
-player_colors = ["45FFA6", "45B1FF", "A245FF", "FF4588", "FF7245", "FFD645"]
-
-board_tiles = [
-	0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,
-]
-
-[opponent.1]
-id = "archie"
-script = "res://scripts/opponents/archie.gd"
-
-[opponent.2]
-id = "jacqueline"
-script = "res://scripts/opponents/jacqueline.gd"
