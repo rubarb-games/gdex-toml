@@ -1,3 +1,5 @@
+orphan_str = "Hello world!"
+
 [audio]
 volume_master = 0
 volume_sfx = 0

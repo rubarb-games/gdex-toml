@@ -9,7 +9,7 @@
         register_types.cpp
 )
 
-target_include_directories( ${PROJECT_NAME}
-    PRIVATE
-        "src"
-)
+#target_include_directories( ${PROJECT_NAME}
+#    PRIVATE
+#        "src"
+#)

@@ -1,20 +1,21 @@
 #ifndef GD_TOML_PARSER
 #define GD_TOML_PARSER
 
-#include <godot_cpp/classes/object.hpp>
-#include "../include/toml.hpp"
+#include <godot_cpp/classes/ref_counted.hpp>
+#include <toml.hpp>
+// #include "../include/toml.hpp"
 
 using namespace godot;
 
-class TomlParser final : public Object {
-    GDCLASS(TomlParser, Object);
+class TomlParser : public RefCounted {
+    GDCLASS(TomlParser, RefCounted);
 
 private:
-    toml::value t;
+    std::unique_ptr<toml::value> t;
 
     static void to_dictionary(const toml::basic_value<toml::type_config> &p_table, Dictionary &p_dict);
     static void to_array(const toml::basic_value<toml::type_config> &p_value, Array &p_array);
-    [[nodiscard]] toml::value find_recursive(const Array &p_keys) const;
+    toml::value find_recursive(const Array &p_keys) const;
 
     template<class T>
     TypedArray<T> FIND_TYPED_ARR(const Array &p_keys) const;
@@ -24,12 +25,13 @@ protected:
 
 public:
     TomlParser();
-    ~TomlParser() override;
+    ~TomlParser();
 
     bool try_parse(const String &p_content);
 
     String get_string(const String &p_key) const;
     String get_string_or(const String &p_key, const String &p_default_value) const;
+
     String get_string_at(const Array &p_keys) const;
     TypedArray<String> get_string_arr_at(const Array &p_keys) const;
 

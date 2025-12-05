@@ -7,3 +7,4 @@ cmake_install.cmake
 godot-project/addons/gdex_toml/**/*
 CMakeFiles/
 dummy.exe
+builds/

@@ -1,4 +1,5 @@
 ﻿#include "toml_parser.h"
+#include <toml.hpp>
 #include "translations.h"
 #include "../include/toml.hpp"
 #include <godot_cpp/core/class_db.hpp>
@@ -51,13 +52,18 @@ void TomlParser::_bind_methods() {
 }
 
 TomlParser::TomlParser() = default;
-TomlParser::~TomlParser() = default;
+TomlParser::~TomlParser() {
+    // auto v = t.release();
+    // v = nullptr;
+}
 
 bool TomlParser::try_parse(const String &p_content) {
+    // what happens if you try to parse a new string and t is not null?
     const auto parse_result = toml::try_parse_str(to_str(p_content));
 
     if (parse_result.is_ok()) {
-        t = parse_result.unwrap();
+        t = std::make_unique<toml::value>(parse_result.unwrap());
+        // t = parse_result.unwrap();
         return true;
     }
 
@@ -70,8 +76,9 @@ String TomlParser::get_string(const String &p_key) const {
     return get_string_or(p_key, "");
 }
 String TomlParser::get_string_or(const String &p_key, const String &p_default_value) const {
-    return {toml::find_or<std::string>(t, to_str(p_key), to_str(p_default_value)).c_str()};
+    return {toml::find_or<std::string>(*t, to_str(p_key), to_str(p_default_value)).c_str()};
 }
+
 String TomlParser::get_string_at(const Array &p_keys) const {
     const toml::value node = find_recursive(p_keys);
     if (node.is_empty() or !node.is_string()) {
@@ -96,7 +103,7 @@ int TomlParser::get_int(const String &p_key) const {
     return get_int_or(p_key, INT32_MIN);
 }
 int TomlParser::get_int_or(const String &p_key, const int p_default_value) const {
-    return toml::find_or<int>(t, to_str(p_key), p_default_value);
+    return toml::find_or<int>(*t, to_str(p_key), p_default_value);
 }
 int TomlParser::get_int_at(const Array &p_keys) const {
     const toml::value node = find_recursive(p_keys);
@@ -113,7 +120,7 @@ float TomlParser::get_float(const String &p_key) const {
     return get_float_or(p_key, FLT_MIN);
 }
 float TomlParser::get_float_or(const String &p_key, const float p_default_value) const {
-    return toml::find_or<float>(t, to_str(p_key), p_default_value);
+    return toml::find_or<float>(*t, to_str(p_key), p_default_value);
 }
 float TomlParser::get_float_at(const Array &p_keys) const {
     const toml::value node = find_recursive(p_keys);
@@ -130,7 +137,7 @@ bool TomlParser::get_bool(const String &p_key) const {
     return get_bool_or(p_key, false);
 }
 bool TomlParser::get_bool_or(const String &p_key, const int p_default_value) const {
-    return toml::find_or<bool>(t, to_str(p_key), p_default_value);
+    return toml::find_or<bool>(*t, to_str(p_key), p_default_value);
 }
 bool TomlParser::get_bool_at(const Array &p_keys) const {
     toml::value node = find_recursive(p_keys);
@@ -147,7 +154,7 @@ Vector2 TomlParser::get_vec2(const String &p_key) const {
     return get_vec2_or(p_key, {});
 }
 Vector2 TomlParser::get_vec2_or(const String &p_key, const Vector2 p_default_value) const {
-    auto val = toml::find<std::vector<float>>(t, to_str(p_key));
+    auto val = toml::find<std::vector<float>>(*t, to_str(p_key));
     if (val.empty() or val.size() != 2) {
         return p_default_value;
     }
@@ -178,14 +185,14 @@ TypedArray<Vector2> TomlParser::get_vec2_arr_at(const Array &p_keys) const {
 }
 
 Vector2i TomlParser::get_vec2i(const String &p_key) const {
-    auto val = toml::find<std::vector<int>>(t, to_str(p_key));
+    auto val = toml::find<std::vector<int>>(*t, to_str(p_key));
     if (val.empty() or val.size() != 2) {
         return {};
     }
     return { val[0], val[1] };
 }
 Vector2i TomlParser::get_vec2i_or(const String &p_key, const Vector2i p_default_value) const {
-    auto val = toml::find<std::vector<int>>(t, to_str(p_key));
+    auto val = toml::find<std::vector<int>>(*t, to_str(p_key));
     if (val.empty() or val.size() != 2) {
         return p_default_value;
     }
@@ -216,14 +223,14 @@ TypedArray<Vector2i> TomlParser::get_vec2i_arr_at(const Array &p_keys) const {
 }
 
 Vector3 TomlParser::get_vec3(const String &p_key) const {
-    auto val = toml::find<std::vector<float>>(t, to_str(p_key));
+    auto val = toml::find<std::vector<float>>(*t, to_str(p_key));
     if (val.empty() or val.size() != 3) {
         return {};
     }
     return { val[0], val[1], val[2] };
 }
 Vector3 TomlParser::get_vec3_or(const String &p_key, const Vector3 p_default_value) const {
-    auto val = toml::find<std::vector<float>>(t, to_str(p_key));
+    auto val = toml::find<std::vector<float>>(*t, to_str(p_key));
     if (val.empty() or val.size() != 3) {
         return p_default_value;
     }
@@ -254,14 +261,14 @@ TypedArray<Vector3> TomlParser::get_vec3_arr_at(const Array &p_keys) const {
 }
 
 Vector3i TomlParser::get_vec3i(const String &p_key) const {
-    auto val = toml::find<std::vector<int>>(t, to_str(p_key));
+    auto val = toml::find<std::vector<int>>(*t, to_str(p_key));
     if (val.empty() or val.size() != 3) {
         return {};
     }
     return { val[0], val[1], val[2] };
 }
 Vector3i TomlParser::get_vec3i_or(const String &p_key, const Vector3i p_default_value) const {
-    auto val = toml::find<std::vector<int>>(t, to_str(p_key));
+    auto val = toml::find<std::vector<int>>(*t, to_str(p_key));
     if (val.empty() or val.size() != 3) {
         return p_default_value;
     }
@@ -292,14 +299,14 @@ TypedArray<Vector3i> TomlParser::get_vec3i_arr_at(const Array &p_keys) const {
 }
 
 Color TomlParser::get_color(const String &p_key) const {
-    auto &val = toml::find<std::string>(t, to_str(p_key));
+    auto &val = toml::find<std::string>(*t, to_str(p_key));
     if (val.empty()) {
         return {};
     }
     return Color::html(val.c_str());
 }
 Color TomlParser::get_color_or(const String &p_key, const Color p_default_value) const {
-    auto &val = toml::find<std::string>(t, to_str(p_key));
+    auto &val = toml::find<std::string>(*t, to_str(p_key));
     if (val.empty()) {
         return p_default_value;
     }
@@ -327,14 +334,14 @@ TypedArray<Color> TomlParser::get_color_arr_at(const Array &p_keys) const {
 
 Dictionary TomlParser::get_table(const String &p_key) const {
     const std::string key = to_str(p_key);
-    if (!t.contains(key) || !t.at(key).is_table()) {
+    if (!t->contains(key) || !t->at(key).is_table()) {
         #ifdef DEBUG_TOML
         UtilityFunctions::print(String("[ERROR] TomlParser::get_table : Cannot find table with key '{0}'. Return empty Dictionary.").format(Array::make(p_key)));
         #endif
         return {};
     }
     Dictionary result = {};
-    to_dictionary(t.at(key), result);
+    to_dictionary(t->at(key), result);
     return result;
 }
 Dictionary TomlParser::get_table_at(const Array &p_keys) const {
@@ -349,14 +356,14 @@ Dictionary TomlParser::get_table_at(const Array &p_keys) const {
 
 Array TomlParser::get_array(const String &p_key) {
     const std::string key = to_str(p_key);
-    if (!t.contains(key) || !t.at(key).is_array()) {
+    if (!t->contains(key) || !t->at(key).is_array()) {
         #ifdef DEBUG_TOML
         UtilityFunctions::print(String("[ERROR] TomlParser::get_array : Cannot find array with key '{0}'. Return empty Array.").format(Array::make(p_key)));
         #endif
         return {};
     }
     Array result = {};
-    to_array(t.at(key), result);
+    to_array(t->at(key), result);
     return result;
 }
 Array TomlParser::get_array_at(const Array &p_keys) const {
@@ -422,7 +429,7 @@ void TomlParser::to_array(const toml::basic_value<toml::type_config> &p_value, A
 
 toml::value TomlParser::find_recursive(const Array &p_keys) const {
     std::vector<toml::value> nodes = {};
-    nodes.reserve(p_keys.size());
+    // nodes.reserve(p_keys.size());
 
     if (p_keys.size() == 0) {
         #ifdef DEBUG_TOML
@@ -432,14 +439,14 @@ toml::value TomlParser::find_recursive(const Array &p_keys) const {
     }
 
     const std::string first = to_str(p_keys[0]);
-    if (!t.contains(first)) {
+    if (!t->contains(first)) {
         #ifdef DEBUG_TOML
         UtilityFunctions::print(String("[ERROR] TomlParser::find_recursive : Could not find key {0} in TOML doc. Return.").format(Array::make(first.c_str())));
         #endif
         return {};
     }
 
-    nodes.emplace_back(t.at(first));
+    nodes.emplace_back(t->at(first));
 
     for (int i = 1, j = 0; i < p_keys.size(); i++, j++) {
         if (!nodes[j].contains(to_str(p_keys[i]))) {

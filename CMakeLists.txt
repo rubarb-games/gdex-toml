@@ -19,10 +19,13 @@ endif()
 set( GODOT_CPP_SYSTEM_HEADERS ON CACHE BOOL "" FORCE )
 
 add_library(${PROJECT_NAME} SHARED
-        src/toml_creator.cpp
-        src/toml_creator.h)
+#        src/toml_creator.cpp
+#        src/toml_creator.h
+#        src/summator.cpp
+#        src/summator.h
+)
 add_subdirectory(src)
-include_directories(include)
+#include_directories(include)
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
@@ -43,7 +46,7 @@ target_link_libraries(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
-        src
+#        src
         include
 )
 
