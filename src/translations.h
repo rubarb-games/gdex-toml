@@ -101,6 +101,16 @@ inline int dec_int(const toml::value &p_val) {
     return static_cast<int>(p_val.as_integer());
 }
 
+inline int64_t dec_long(const toml::value &p_val) {
+    #ifdef DEBUG_TOML
+    if (!p_val.is_integer()) {
+        UtilityFunctions::print("[ERROR] dec_int : Value is not an integer");
+
+    }
+    #endif
+    return p_val.as_integer();
+}
+
 inline float dec_float(const toml::value &p_val) {
     #ifdef DEBUG_TOML
     if (!p_val.is_floating()) {

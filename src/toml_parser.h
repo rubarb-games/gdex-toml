@@ -35,10 +35,10 @@ public:
     String get_string_at(const Array &p_keys) const;
     TypedArray<String> get_string_arr_at(const Array &p_keys) const;
 
-    int get_int(const String &p_key) const;
-    int get_int_or(const String &p_key, int p_default_value) const;
-    int get_int_at(const Array &p_keys) const;
-    TypedArray<int> get_int_arr_at(const Array &p_keys) const;
+    int64_t get_int(const String &p_key) const;
+    int64_t get_int_or(const String &p_key, int64_t p_default_value) const;
+    int64_t get_int_at(const Array &p_keys) const;
+    TypedArray<int64_t> get_int_arr_at(const Array &p_keys) const;
 
     template<class T>
     T FIND_RECURSIVE(const Array &p_keys, T p_return_val);
@@ -81,7 +81,7 @@ public:
     Dictionary get_table(const String &p_key) const;
     Dictionary get_table_at(const Array &p_keys) const;
 
-    Array get_array(const String &p_key);
+    Array get_array(const String &p_key) const;
     Array get_array_at(const Array &p_keys) const;
 };
 

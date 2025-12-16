@@ -99,21 +99,21 @@ TypedArray<String> TomlParser::get_string_arr_at(const Array &p_keys) const {
     return result;
 }
 
-int TomlParser::get_int(const String &p_key) const {
-    return get_int_or(p_key, INT32_MIN);
+int64_t TomlParser::get_int(const String &p_key) const {
+    return get_int_or(p_key, INT64_MIN);
 }
-int TomlParser::get_int_or(const String &p_key, const int p_default_value) const {
-    return toml::find_or<int>(*t, to_str(p_key), p_default_value);
+int64_t TomlParser::get_int_or(const String &p_key, const int64_t p_default_value) const {
+    return toml::find_or<int64_t>(*t, to_str(p_key), p_default_value);
 }
-int TomlParser::get_int_at(const Array &p_keys) const {
+int64_t TomlParser::get_int_at(const Array &p_keys) const {
     const toml::value node = find_recursive(p_keys);
     if (node.is_empty() or !node.is_integer()) {
-        return INT32_MIN;
+        return INT64_MIN;
     }
-    return toml::get<int>(node);
+    return toml::get<int64_t>(node);
 }
-TypedArray<int> TomlParser::get_int_arr_at(const Array &p_keys) const {
-    return FIND_TYPED_ARR<int>(p_keys);
+TypedArray<int64_t> TomlParser::get_int_arr_at(const Array &p_keys) const {
+    return FIND_TYPED_ARR<int64_t>(p_keys);
 }
 
 float TomlParser::get_float(const String &p_key) const {
@@ -354,7 +354,7 @@ Dictionary TomlParser::get_table_at(const Array &p_keys) const {
     return result;
 }
 
-Array TomlParser::get_array(const String &p_key) {
+Array TomlParser::get_array(const String &p_key) const {
     const std::string key = to_str(p_key);
     if (!t->contains(key) || !t->at(key).is_array()) {
         #ifdef DEBUG_TOML
@@ -384,7 +384,7 @@ void TomlParser::to_dictionary(const toml::basic_value<toml::type_config> &p_tab
             p_dict[label] = v.as_boolean();
         }
         if (v.is_integer()) {
-            p_dict[label] = dec_int(v);
+            p_dict[label] = dec_long(v);
         }
         if (v.is_floating()) {
             p_dict[label] = dec_float(v);
@@ -411,7 +411,7 @@ void TomlParser::to_array(const toml::basic_value<toml::type_config> &p_value, A
             p_array.append(value.as_boolean());
         }
         if (value.is_integer()) {
-            p_array.append(dec_int(value));
+            p_array.append(dec_long(value));
         }
         if (value.is_floating()) {
             p_array.append(dec_float(value));
