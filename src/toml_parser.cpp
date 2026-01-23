@@ -303,21 +303,27 @@ Color TomlParser::get_color(const String &p_key) const {
     if (val.empty()) {
         return {};
     }
-    return Color::html(val.c_str());
+    Array result = {};
+    to_array(val, result);
+    return {result[0], result[1], result[2], result[3]};
 }
 Color TomlParser::get_color_or(const String &p_key, const Color p_default_value) const {
     auto &val = toml::find<std::string>(*t, to_str(p_key));
     if (val.empty()) {
         return p_default_value;
     }
-    return Color::html(val.c_str());
+    Array result = {};
+    to_array(val, result);
+    return {result[0], result[1], result[2], result[3]};
 }
 Color TomlParser::get_color_at(const Array &p_keys) const {
-    auto node = find_recursive(p_keys);
-    if (node.is_empty() or !node.is_string()) {
+    const toml::value node = find_recursive(p_keys);
+    if (node.is_empty() or !node.is_array()) {
         return Color{0,0,0,0};
     }
-    return Color::html(node.as_string().c_str());
+    Array result = {};
+    to_array(node, result);
+    return {result[0], result[1], result[2], result[3]};
 }
 TypedArray<Color> TomlParser::get_color_arr_at(const Array &p_keys) const {
     const toml::value node = find_recursive(p_keys);
@@ -327,7 +333,9 @@ TypedArray<Color> TomlParser::get_color_arr_at(const Array &p_keys) const {
 
     TypedArray<Color> result = {};
     for (const auto vecs = toml::get<std::vector<std::string>>(node); const auto &v : vecs) {
-        result.append(Color::html(v.c_str()));
+        Array arr = {};
+        to_array(v, arr);
+        result.append(Color(arr[0], arr[1], arr[2], arr[3]));
     }
     return result;
 }

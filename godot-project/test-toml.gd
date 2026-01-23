@@ -19,6 +19,7 @@ func _ready() -> void:
 		return
 
 	p("orphan_str", parser.get_string("orphan_str"))
+	p("items", parser.get_table("items"))
 	#p("default_moves", parser.get_int_at(["gameplay", "default_moves"]))
 	#p("default_gravel_per_tile", parser.get_int_at(["gameplay", "default_gravel_per_tile"]))
 	#

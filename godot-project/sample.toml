@@ -56,3 +56,9 @@ handlers = [
 	"colorswap", 
 	"oreblaster"
 ]
+
+[items.slot.0]
+name = "first"
+
+[items.slot.1]
+name = "second"

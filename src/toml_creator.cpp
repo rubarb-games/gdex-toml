@@ -53,6 +53,7 @@ void TomlCreator::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_vector4_to_section", "p_section", "p_label", "p_value"), &TomlCreator::set_vector4_to_section);
     ClassDB::bind_method(D_METHOD("set_vector4i_to_section", "p_section", "p_label", "p_value"), &TomlCreator::set_vector4i_to_section);
     ClassDB::bind_method(D_METHOD("set_variant_to_section", "p_section", "p_label", "p_value"), &TomlCreator::set_variant_to_section);
+    ClassDB::bind_method(D_METHOD("set_array_to_section", "p_section", "p_label", "p_value"), &TomlCreator::set_array_to_section);
 
     ClassDB::bind_method(D_METHOD("format_array", "p_label", "p_arrfmt", "p_body_indent", "p_closing_indent"), &TomlCreator::format_array, DEFVAL(4), DEFVAL(2));
     ClassDB::bind_method(D_METHOD("format_table", "p_label", "p_tblfmt", "p_body_indent", "p_closing_indent", "p_name_indent", "p_indent_char"), &TomlCreator::format_table, DEFVAL(4), DEFVAL(2), DEFVAL(0), DEFVAL(0));
@@ -76,6 +77,10 @@ void TomlCreator::set_array(const String &p_label, const Array &p_value) {
     toml::value arr(toml::array{});
     parse_array(arr, p_value);
     t[to_str(p_label)] = arr;
+}
+
+void TomlCreator::set_array_to_section(const String &p_section, const String &p_label, const Array &p_value) {
+    set_to_section(p_section, p_label, p_value);
 }
 
 void TomlCreator::set_dictionary(const String &p_label, const Dictionary &p_value) {

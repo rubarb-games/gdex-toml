@@ -59,6 +59,9 @@ public:
     void set_vector4i(const String &p_label, const Vector4i &p_value);
     void set_variant(const String &p_label, const Variant &p_value);
     void set_array(const String &p_label, const Array &p_value);
+
+    void set_array_to_section(const String &p_section, const String &p_label, const Array &p_value);
+
     void set_dictionary(const String &p_label, const Dictionary &p_value);
 
     void set_int_to_section(const String &p_section, const String &p_label, int p_value);

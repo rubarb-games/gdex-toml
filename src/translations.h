@@ -27,7 +27,7 @@ inline toml::value enc_bool(bool p_value) {
 }
 
 inline toml::value enc_color(const Color &p_value) {
-    return toml::value{p_value.to_rgba64()};
+    return toml::array{p_value.r, p_value.g, p_value.b, p_value.a};
 }
 
 inline toml::value enc_vector2(const Vector2 &p_value) {
