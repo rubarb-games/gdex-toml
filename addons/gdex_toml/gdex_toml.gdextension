@@ -1,0 +1,8 @@
+[configuration]
+entry_symbol="toml_parser_init"
+compatibility_minimum="4.4"
+reloadable=true
+
+[libraries]
+windows.debug.x86_64="res://addons/gdex_toml/bin/gdex_toml.windows.x86_64.debug.dll"
+windows.release.x86_64="res://addons/gdex_toml/bin/gdex_toml.windows.x86_64.release.dll"

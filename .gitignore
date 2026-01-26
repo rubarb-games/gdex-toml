@@ -8,3 +8,9 @@ godot-project/addons/gdex_toml/**/*
 CMakeFiles/
 dummy.exe
 builds/
+.temp/
+*.dblite
+output/
+scons_cache/
+*.obj
+godot-editor/
