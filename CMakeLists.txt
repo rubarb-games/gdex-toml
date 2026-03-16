@@ -63,48 +63,49 @@ set_target_properties( ${PROJECT_NAME}
     PROPERTIES
         CXX_VISIBILITY_PRESET hidden
         VISIBILITY_INLINES_HIDDEN true
-        VERSION 0.1.0
-        SOVERSION 1
         RUNTIME_OUTPUT_DIRECTORY "${BUILD_OUTPUT_DIR}/${LIB_DIR}"
         LIBRARY_OUTPUT_DIRECTORY "${BUILD_OUTPUT_DIR}/${LIB_DIR}"
 )
 
 # install
-if(WIN32)
-    set(LIB_FILE_NAME "${PROJECT_NAME}.windows.x86_64.$<IF:$<CONFIG:Debug>,debug,release>.dll")
-    set_property(TARGET ${PROJECT_NAME}
-        PROPERTY OUTPUT_NAME "${PROJECT_NAME}.windows.x86_64.$<IF:$<CONFIG:Debug>,debug,release>")
-elseif(APPLE)
-    # don't know the extension
-    set(LIB_FILE_NAME "${PROJECT_NAME}.macos.$<IF:$<CONFIG:Debug>,debug,release>")
-    set_property(TARGET ${PROJECT_NAME}
-        PROPERTY OUTPUT_NAME "${PROJECT_NAME}.macos.$<IF:$<CONFIG:Debug>,debug,release>")
-    set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX "")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(GDEXTOML_REL_TYPE "debug")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(GDEXTOML_REL_TYPE "release")
 endif()
 
+message( STATUS "Rel type: ${GDEXTOML_REL_TYPE}")
+
+if(WIN32)
+    set(LIB_FILE_NAME "${PROJECT_NAME}.windows.x86_64.${GDEXTOML_REL_TYPE}.dll")
+elseif(APPLE)
+    set(LIB_FILE_NAME "${PROJECT_NAME}.macos.${GDEXTOML_REL_TYPE}.framework")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(LIB_FILE_NAME "${PROJECT_NAME}.linux.x86_64.${GDEXTOML_REL_TYPE}")
+endif()
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY OUTPUT_NAME ${LIB_FILE_NAME})
 set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/godot-project/addons/${PROJECT_NAME}")
+set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
 
-if(WIN32)
-    install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION bin
-        PUBLIC_HEADER DESTINATION include
-        )
-elseif(APPLE)
-    install(TARGETS ${PROJECT_NAME}
-        DESTINATION bin/lib${PROJECT_NAME}.macos.$<IF:$<CONFIG:Debug>,debug,release>.framework
-        PUBLIC_HEADER DESTINATION include
-    )
+message( STATUS "Lib file name: ${LIB_FILE_NAME}")
+message( STATUS "Install prefix: ${CMAKE_SOURCE_DIR}/godot-project/addons/${PROJECT_NAME}")
+
+if(APPLE)
+    set(GDEXTOML_INSTALL_DEST "bin/${PROJECT_NAME}.macos.${GDEXTOML_REL_TYPE}.framework")
+else()
+    set(GDEXTOML_INSTALL_DEST "bin")
 endif()
+
+message( STATUS "Install dest: ${GDEXTOML_INSTALL_DEST}")
+
+install(TARGETS ${PROJECT_NAME}
+        RUNTIME DESTINATION ${GDEXTOML_INSTALL_DEST}
+        LIBRARY DESTINATION ${GDEXTOML_INSTALL_DEST}
+        PUBLIC_HEADER DESTINATION include
+)
 
 install(FILES gdex_toml.gdextension DESTINATION .)
-
-# work-temp is for debugging the dll while the game is running. Build the game to work-temp first.
-#install(
-#FILES
-#    "${CMAKE_SOURCE_DIR}/godot-project/addons/${PROJECT_NAME}/bin/${LIB_FILE_NAME}"
-#DESTINATION
-#    "${CMAKE_SOURCE_DIR}/work-temp"
-#)
 
 # dummy to trick CLion into building
 add_executable(dummy dummy.cpp)

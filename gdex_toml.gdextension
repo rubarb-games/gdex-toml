@@ -4,5 +4,7 @@ compatibility_minimum="4.4"
 reloadable=true
 
 [libraries]
-windows.debug.x86_64="res://addons/gdex_toml/bin/gdex_toml.windows.x86_64.debug.dll"
-windows.release.x86_64="res://addons/gdex_toml/bin/gdex_toml.windows.x86_64.release.dll"
+linux.debug.x86_64="./bin/gdex_toml.linux.x86_64.debug.so"
+linux.release.x86_64="./bin/gdex_toml.linux.x86_64.release.so"
+windows.debug.x86_64="./bin/gdex_toml.windows.x86_64.debug.dll"
+windows.release.x86_64="./bin/gdex_toml.windows.x86_64.release.dll"

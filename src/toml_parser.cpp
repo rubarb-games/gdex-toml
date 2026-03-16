@@ -1,4 +1,6 @@
 ﻿#include "toml_parser.h"
+
+#include <cfloat>
 #include <toml.hpp>
 #include "translations.h"
 #include "../include/toml.hpp"
