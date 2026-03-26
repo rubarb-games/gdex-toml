@@ -167,8 +167,10 @@ void TomlCreator::set_value_at(const Array &p_keys, const String &p_label, const
         if (!tmp.contains(key)) {
             log("add table for key {0}", {p_keys[i]});
             tmp[key] = toml::table{};
+            tmp = *std::make_shared<toml::value>(tmp.at(key));
+            continue;
             // tmp = toml::table{ { key, toml::table{} } };
-            tmp = tmp.at(key).as_table();
+            // tmp = tmp.at(key).as_table();
         // } else {
         //     log("output contains key {0}", {p_keys[i]});
         //     log("append table for key {0}", {p_keys[i]});
@@ -180,33 +182,19 @@ void TomlCreator::set_value_at(const Array &p_keys, const String &p_label, const
             return;
         }
 
-        tmp = tmp.at(key).as_table();
+        // tmp = tmp.at(key).as_table();
+        tmp = *std::make_shared<toml::value>(tmp.at(key));
 
         if (i == p_keys.size()-1) {
             log("done. inject {0}", {p_label});
             tmp[to_str(p_label)] = p_value;
         }
-        // output = toml::find_or_default<toml::value>(output, key);
-        //
-        // if (output.is_empty()) {
-        //     log("key {0} is empty", {p_keys[i]});
-        //
-        //     output[key] = toml::table{};
-        //     output = output[key];
-        // }
-        //
-        // if (i == p_keys.size()-1) {
-        //     log("done. inject {0}", {p_label});
-        //     output[to_str(p_label)] = p_value;
-        // // } else {
-        // //     log("find key {0} in output", {p_keys[i]});
-        // //     output = toml::find_or_default<toml::value>(output, to_str(p_keys[i]));
-        // }
     }
 
     log("write output to {0}", {p_keys[0]});
     // toml::value &doc = *t;
-    doc[root_key] = *output;
+    // doc[root_key] = *output;
+    doc[root_key] = std::move(*output);
     // t->at(to_str(p_keys[0])) = output;
 }
 void TomlCreator::set_value(const String &p_label, const Variant &p_value) const {
