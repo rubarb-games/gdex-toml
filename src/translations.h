@@ -88,7 +88,7 @@ inline toml::value enc(const Variant &p_value) {
     if (p_value.get_type() == Variant::VECTOR4I) {
         return enc_vector4i(p_value);
     }
-    return {"[Could not find encoder for variant]"};
+    return {"[gdex-toml :: Could not find encoder for variant]"};
 }
 
 inline int dec_int(const toml::value &p_val) {

@@ -85,16 +85,19 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY OUTPUT_NAME ${LIB_FILE_NAME})
-set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/godot-project/addons/${PROJECT_NAME}")
+#set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/godot-project/addons/${PROJECT_NAME}")
+set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}")
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
 
 message( STATUS "Lib file name: ${LIB_FILE_NAME}")
-message( STATUS "Install prefix: ${CMAKE_SOURCE_DIR}/godot-project/addons/${PROJECT_NAME}")
+message( STATUS "Install prefix: ${CMAKE_INSTALL_PREFIX}")
 
 if(APPLE)
-    set(GDEXTOML_INSTALL_DEST "bin/${PROJECT_NAME}.macos.${GDEXTOML_REL_TYPE}.framework")
+    set(GDEXTOML_INSTALL_DEST "godot-project/addons/${PROJECT_NAME}/bin/${PROJECT_NAME}.macos.${GDEXTOML_REL_TYPE}.framework")
+    set(GDEXTOML_OUTPUT_DEST "output/${PROJECT_NAME}.macos.${GDEXTOML_REL_TYPE}.framework")
 else()
-    set(GDEXTOML_INSTALL_DEST "bin")
+    set(GDEXTOML_INSTALL_DEST "godot-project/addons/${PROJECT_NAME}/bin")
+    set(GDEXTOML_OUTPUT_DEST "output/")
 endif()
 
 message( STATUS "Install dest: ${GDEXTOML_INSTALL_DEST}")
@@ -104,8 +107,13 @@ install(TARGETS ${PROJECT_NAME}
         LIBRARY DESTINATION ${GDEXTOML_INSTALL_DEST}
         PUBLIC_HEADER DESTINATION include
 )
+install(TARGETS ${PROJECT_NAME}
+        RUNTIME DESTINATION ${GDEXTOML_OUTPUT_DEST}
+        LIBRARY DESTINATION ${GDEXTOML_OUTPUT_DEST}
+        PUBLIC_HEADER DESTINATION include
+)
 
-install(FILES gdex_toml.gdextension DESTINATION .)
+install(FILES gdex_toml.gdextension DESTINATION "godot-project/addons/${PROJECT_NAME}")
 
 # dummy to trick CLion into building
 add_executable(dummy dummy.cpp)

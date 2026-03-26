@@ -3,16 +3,42 @@ extends Node
 func p(prefix: String, val: Variant) -> void:
 	print("%s : %s" % [prefix, str(val)])
 
-#var parser: TomlParser
-#var creator: TomlCreator
-
 func _ready() -> void:
-	print("\nTomlParser ===================\n")
-	
-	
-	#print("\nTomlParser ===================\n")
+	test_creator()
+	#test_parser()
 
+func test_creator():
+	var toml: TomlCreator = TomlCreator.new()
+	print("=== TomlCreator ===================\n")
+
+	toml.set_int("my_int", 1704)
+	toml.set_int("my_int", 1024) # overwrites the previously set my_int
+
+#	toml.set_int_at(["audio"], "master_volume", 100)
+	toml.set_int_at(["a", "b", "c"], "master_volume", 100)
+
+	toml.set_table_at(["ability", "paint_it_red"], {
+		abc = 1234,
+		hei = "sveis"
+	})
+#	toml.test(["ability", "gravel_everyday"], {
+#		abc = 246,
+#		hei = "hade"
+#	})
+
+	var ts: String = toml.serialize()
+	print("toml created:\n")
+	print(ts)
+	print("---\n")
+
+#	var tp: TomlParser = TomlParser.new()
+#	tp.try_parse(ts)
+
+#	p("paint_it_red", tp.get_table_at(["ability", "paint_it_red"]))
+
+func test_parser():
 	var parser = TomlParser.new()
+	print("\nTomlParser ===================\n")
 	var path: String = "res://sample.toml"
 	if load_toml_file(parser, [path]) != OK:
 		print("Failed to load sample file from "+path)
@@ -51,31 +77,6 @@ func _ready() -> void:
 	#
 	#display_fullscreen = ObservableBool.new(parser.get_bool_at(["display", "fullscreen"]))
 	#parser.free()
-	
-	#print("\nTomlCreator ===================\n")
-
-	#creator = TomlCreator.new()
-	#creator.set_int("my_int", 1704)
-	#creator.set_int("my_int", 1024) # overwrites the previously set my_int
-	#creator.set_color("color", Color.BROWN)
-	#creator.set_vector2("vec2", Vector2(0.5, 0.85))
-	#creator.set_vector2i("vec2i", Vector2i(5, 85))
-	#creator.set_variant("variant", true)
-	#creator.set_array("arr", ["hey", 1.0, 2, false, Vector2(0.25, 0.9)])
-	#creator.set_int_to_section("my-section", "some_int", 1704)
-	#creator.set_int_to_section("my-section", "some_int", 1802)
-	#creator.set_dictionary("dict1", {
-		#"hello": "world",
-		#"nested": { "whatever": true },
-		#"arr_dict": [{ "key": true }, { "key": false }]
-	#})
-	#creator.set_int_to_section("my-section", "other_int", 1802)
-	#creator.set_bool_to_section("my-section", "doodad", false)
-	#creator.set_color("color_x", Color.CORNFLOWER_BLUE)
-	#creator.format_array("arr", TomlCreator.ArrayFormat.AF_ONELINE)
-	#creator.format_table("dict1", TomlCreator.TF_MULTILINE, 0, 0, 0, TomlCreator.IC_SPACE)
-	#print(creator.serialize())
-	#creator.free()
 
 #func _exit_tree() -> void:
 	#parser = null

@@ -3,7 +3,6 @@
 
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <toml.hpp>
-// #include "../include/toml.hpp"
 
 using namespace godot;
 
@@ -31,7 +30,6 @@ public:
 
     String get_string(const String &p_key) const;
     String get_string_or(const String &p_key, const String &p_default_value) const;
-
     String get_string_at(const Array &p_keys) const;
     TypedArray<String> get_string_arr_at(const Array &p_keys) const;
 

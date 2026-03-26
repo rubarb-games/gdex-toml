@@ -59,13 +59,13 @@ download_export_templates() {
   ver="${GODOT_VER/-/.}"
   destination="${HOME}/.local/share/godot/export_templates/${ver}/"
 
-  echo "Download export template for ${GODOT_VER} (${ver}) to ${destination}"
-
   # Check if export templates has been installed, if not install it
   #/home/xx/.local/share/godot/export_templates/4.4.1.stable/
   if [ -d "${destination}/" ]; then
     echo "No need to download export templates for Godot ${GODOT_VER} (${ver}), they have already been installed"
   else
+
+    echo "Download export template for ${GODOT_VER} (${ver}) to ${destination}"
 
     # delete the temporary tpz file if it exists
     if [ -f "${downloaded_file}" ]; then
@@ -91,15 +91,14 @@ download_export_templates() {
 # export_project "release" -> exports project in release mode
 # export_project "debug"   -> exports project in debug mode
 export_project() {
-  echo "Export Godot project"
-  
-  mode=$2
+  mode=$1
+
+  echo "Export Godot project in ${mode} mode"
 
   if [[ -z $mode ]] ; then
     mode="debug"
   fi
 
-  #godot_editor="$(pwd)/${FOLDER_GODOT_EDITOR}/${FILE_EXE}"
   log_export="$(pwd)/${FOLDER_TEMP}/${FILE_EXPORT_LOG}"
 
   # Export Godot project
@@ -214,10 +213,13 @@ if [[ -z $export_type ]] ; then
   export_type="project"
 fi
 
+rm_dir "${FOLDER_OUTPUT}"
 make_dir "${FOLDER_TEMP}"
 
 download_editor
 download_export_templates
+
+export_project "${export_mode}"
 
 #if [ "$export_type" = "project" ]; then
 #  export_project "${export_mode}"
