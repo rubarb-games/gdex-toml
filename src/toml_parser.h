@@ -11,9 +11,12 @@ class TomlParser : public RefCounted {
 
 private:
     std::unique_ptr<toml::value> t;
+    bool enable_logging;
 
     static void to_dictionary(const toml::basic_value<toml::type_config> &p_table, Dictionary &p_dict);
     static void to_array(const toml::basic_value<toml::type_config> &p_value, Array &p_array);
+
+    bool has_path(const Array &p_keys) const;
     toml::value find_recursive(const Array &p_keys) const;
 
     template<class T>
@@ -22,11 +25,18 @@ private:
 protected:
     static void _bind_methods();
 
+    void log(const String &message, const Array &args) const;
+
 public:
     TomlParser();
     ~TomlParser();
 
+    void logging(bool logging);
+
     bool try_parse(const String &p_content);
+
+    bool key_exists(const String &p_key) const;
+    bool path_exist(const Array &p_keys) const;
 
     String get_string(const String &p_key) const;
     String get_string_or(const String &p_key, const String &p_default_value) const;
@@ -38,8 +48,8 @@ public:
     int64_t get_int_at(const Array &p_keys) const;
     TypedArray<int64_t> get_int_arr_at(const Array &p_keys) const;
 
-    template<class T>
-    T FIND_RECURSIVE(const Array &p_keys, T p_return_val);
+    // template<class T>
+    // T FIND_RECURSIVE(const Array &p_keys, T p_return_val);
 
     float get_float(const String &p_key) const;
     float get_float_or(const String &p_key, float p_default_value) const;

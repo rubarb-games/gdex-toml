@@ -1,4 +1,7 @@
 #include "toml_creator.h"
+
+#include <deque>
+
 #include "../include/toml.hpp"
 #include "translations.h"
 #include <godot_cpp/core/class_db.hpp>
@@ -7,10 +10,17 @@
 using namespace godot;
 
 TomlCreator::TomlCreator() {
+    // disable logging in release build
+    enable_logging = true;
     t = std::make_unique<toml::value>();
 }
+
 TomlCreator::~TomlCreator() {
     // t = nullptr;
+}
+
+void TomlCreator::logging(bool logging) {
+    enable_logging = logging;
 }
 
 void TomlCreator::_bind_methods() {
@@ -29,6 +39,8 @@ void TomlCreator::_bind_methods() {
     ClassDB::bind_integer_constant("TomlCreator", "IndentChar", "IC_SPACE", IC_SPACE);
     ClassDB::bind_integer_constant("TomlCreator", "IndentChar", "IC_TAB", IC_TAB);
 
+    ClassDB::bind_method(D_METHOD("logging", "logging"), &TomlCreator::logging);
+
     ClassDB::bind_method(D_METHOD("set_int", "p_label", "p_value"), &TomlCreator::set_int);
     ClassDB::bind_method(D_METHOD("set_float", "p_label", "p_value"), &TomlCreator::set_float);
     ClassDB::bind_method(D_METHOD("set_string", "p_label", "p_value"), &TomlCreator::set_string);
@@ -44,36 +56,43 @@ void TomlCreator::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_array", "p_label", "p_value"), &TomlCreator::set_array);
     ClassDB::bind_method(D_METHOD("set_table", "p_label", "p_value"), &TomlCreator::set_table);
 
-    ClassDB::bind_method(D_METHOD("set_int_at", "p_label", "p_value"), &TomlCreator::set_int_at);
-    ClassDB::bind_method(D_METHOD("set_float_at", "p_label", "p_value"), &TomlCreator::set_float_at);
-    ClassDB::bind_method(D_METHOD("set_string_at", "p_label", "p_value"), &TomlCreator::set_string_at);
-    ClassDB::bind_method(D_METHOD("set_bool_at", "p_label", "p_value"), &TomlCreator::set_bool_at);
-    ClassDB::bind_method(D_METHOD("set_color_at", "p_label", "p_value"), &TomlCreator::set_color_at);
-    ClassDB::bind_method(D_METHOD("set_vec2_at", "p_label", "p_value"), &TomlCreator::set_vec2_at);
-    ClassDB::bind_method(D_METHOD("set_vec2i_at", "p_label", "p_value"), &TomlCreator::set_vec2i_at);
-    ClassDB::bind_method(D_METHOD("set_vec3_at", "p_label", "p_value"), &TomlCreator::set_vec3_at);
-    ClassDB::bind_method(D_METHOD("set_vec3i_at", "p_label", "p_value"), &TomlCreator::set_vec3i_at);
-    ClassDB::bind_method(D_METHOD("set_vec4_at", "p_label", "p_value"), &TomlCreator::set_vec4_at);
-    ClassDB::bind_method(D_METHOD("set_vec4i_at", "p_label", "p_value"), &TomlCreator::set_vec4i_at);
-    ClassDB::bind_method(D_METHOD("set_variant_at", "p_label", "p_value"), &TomlCreator::set_variant_at);
-    ClassDB::bind_method(D_METHOD("set_array_at", "p_label", "p_value"), &TomlCreator::set_array_at);
-    ClassDB::bind_method(D_METHOD("set_table_at", "p_label", "p_value"), &TomlCreator::set_table_at);
+    // ClassDB::bind_method(D_METHOD("set_int_at", "p_keys", "p_label", "p_value"), &TomlCreator::set_int_at);
+    // ClassDB::bind_method(D_METHOD("set_float_at", "p_label", "p_value"), &TomlCreator::set_float_at);
+    // ClassDB::bind_method(D_METHOD("set_string_at", "p_label", "p_value"), &TomlCreator::set_string_at);
+    // ClassDB::bind_method(D_METHOD("set_bool_at", "p_label", "p_value"), &TomlCreator::set_bool_at);
+    // ClassDB::bind_method(D_METHOD("set_color_at", "p_label", "p_value"), &TomlCreator::set_color_at);
+    // ClassDB::bind_method(D_METHOD("set_vec2_at", "p_label", "p_value"), &TomlCreator::set_vec2_at);
+    // ClassDB::bind_method(D_METHOD("set_vec2i_at", "p_label", "p_value"), &TomlCreator::set_vec2i_at);
+    // ClassDB::bind_method(D_METHOD("set_vec3_at", "p_label", "p_value"), &TomlCreator::set_vec3_at);
+    // ClassDB::bind_method(D_METHOD("set_vec3i_at", "p_label", "p_value"), &TomlCreator::set_vec3i_at);
+    // ClassDB::bind_method(D_METHOD("set_vec4_at", "p_label", "p_value"), &TomlCreator::set_vec4_at);
+    // ClassDB::bind_method(D_METHOD("set_vec4i_at", "p_label", "p_value"), &TomlCreator::set_vec4i_at);
+    // ClassDB::bind_method(D_METHOD("set_variant_at", "p_label", "p_value"), &TomlCreator::set_variant_at);
+    // ClassDB::bind_method(D_METHOD("set_array_at", "p_label", "p_value"), &TomlCreator::set_array_at);
+    // ClassDB::bind_method(D_METHOD("set_table_at", "p_label", "p_value"), &TomlCreator::set_table_at);
 
     ClassDB::bind_method(D_METHOD("format_array", "p_label", "p_arrfmt", "p_body_indent", "p_closing_indent"), &TomlCreator::format_array, DEFVAL(4), DEFVAL(2));
     ClassDB::bind_method(D_METHOD("format_table", "p_label", "p_tblfmt", "p_body_indent", "p_closing_indent", "p_name_indent", "p_indent_char"), &TomlCreator::format_table, DEFVAL(4), DEFVAL(2), DEFVAL(0), DEFVAL(0));
     ClassDB::bind_method(D_METHOD("serialize"), &TomlCreator::serialize);
 }
 
-static void log(const String &message, const Array &args = {}) {
-    // check if logging is enabled
-    UtilityFunctions::print(message.format(args));
+void TomlCreator::log(const String &message, const Array &args = {}) const {
+    if (enable_logging) {
+        UtilityFunctions::print(message.format(args));
+    }
 }
 
-static bool ensure(const bool condition, const std::string &message, const Array &args = {}) {
+bool TomlCreator::ensure(const bool condition, const std::string &message, const Array &args = {}) const {
     if (!condition) {
         log(String(message.c_str()), args);
     }
     return condition;
+}
+
+void TomlCreator::warn_if(const bool condition, const std::string &message, const Array &args = {}) const {
+    if (condition) {
+        log(String(message.c_str()), args);
+    }
 }
 
 void TomlCreator::parse_dict(toml::value &p_toml, const Dictionary &p_dict) {
@@ -135,9 +154,7 @@ void TomlCreator::set_value_at(const Array &p_keys, const toml::value& p_value) 
         }
     }
 
-    // toml::value &doc = *t;
     doc[to_str(p_keys[0])] = output;
-    // t->at(to_str(p_keys[0])) = output;
 }
 
 // template<typename T>
@@ -152,9 +169,13 @@ void TomlCreator::set_value_at(const Array &p_keys, const String &p_label, const
     }
 
     log("root_key: {0}", {root_key.c_str()});
-    // auto output = toml::find_or_default<toml::table>(doc, root_key);
-    const auto output = std::make_shared<toml::value>(toml::find_or_default<toml::table>(doc, root_key));
-    auto &tmp = *output;
+    // toml::value output = toml::find_or_default<toml::table>(doc, root_key);
+    // const auto output = std::make_shared<toml::value>(toml::find_or_default<toml::table>(doc, root_key));
+    std::vector<std::shared_ptr<toml::value>> tmps = {};
+    // tmps.emplace_back(toml::find_or_default<toml::table>(doc, root_key));
+    tmps.emplace_back(std::make_shared<toml::value>(toml::find_or_default<toml::table>(doc, root_key)));
+    // auto tmp = std::make_shared<toml::value>(output);
+    // toml::value &tt = output;
 
     // if (output.is_empty()) {
     //     log("root_key is empty");
@@ -163,12 +184,17 @@ void TomlCreator::set_value_at(const Array &p_keys, const String &p_label, const
     for (int i=1; i<p_keys.size(); i++) {
         std::string key = to_str(p_keys[i]);
         log("key {0}: {1}", {i, p_keys[i]});
+        log("i: {0} tmp: {1}", {i, i-1});
+        toml::value &cur = *tmps[i-1];
 
-        if (!tmp.contains(key)) {
+        if (!cur.contains(key)) {
             log("add table for key {0}", {p_keys[i]});
-            tmp[key] = toml::table{};
-            tmp = *std::make_shared<toml::value>(tmp.at(key));
-            continue;
+            cur[key] = toml::table{};
+            // tmps.emplace_back(std::make_shared<toml::value>(cur.at(key)));
+            // tmp = *std::make_shared<toml::value>(tmp.at(key));
+            // tmp = std::make_shared<toml::value>(tmp->at(key));
+            // tmp.reset(tmp->[key]);
+            // continue;
             // tmp = toml::table{ { key, toml::table{} } };
             // tmp = tmp.at(key).as_table();
         // } else {
@@ -177,26 +203,44 @@ void TomlCreator::set_value_at(const Array &p_keys, const String &p_label, const
         //     output = output.at(key).as_table();
         }
 
-        if (!tmp.at(key).is_table()) {
+        if (!cur.at(key).is_table()) {
             log("entry at key {0} is not a table", {p_keys[i]});
             return;
         }
 
         // tmp = tmp.at(key).as_table();
-        tmp = *std::make_shared<toml::value>(tmp.at(key));
+        // tmp = std::make_shared<toml::value>(tmp->at(key));
+        // tmps.emplace_back(&cur.at(key));
+        log("add pointer to table for key {0}", {p_keys[i]});
+        tmps.emplace_back(std::make_shared<toml::value>(cur.at(key)));
 
         if (i == p_keys.size()-1) {
+            toml::value &last = *tmps[i];
             log("done. inject {0}", {p_label});
-            tmp[to_str(p_label)] = p_value;
+            log("i: {0} last: {1}", {i, i});
+            // tmp[to_str(p_label)] = p_value;
+            last[to_str(p_label)] = p_value;
         }
     }
 
     log("write output to {0}", {p_keys[0]});
     // toml::value &doc = *t;
-    // doc[root_key] = *output;
-    doc[root_key] = std::move(*output);
+    doc[root_key] = std::move(*tmps[0]);
+    // doc[root_key] = std::move(output);
     // t->at(to_str(p_keys[0])) = output;
 }
+
+template<typename T>
+T TomlCreator::find_recursive(const toml::value& v, std::deque<std::string> keys) {
+    if(keys.size() == 1) {
+        return toml::find<T>(v, keys.front());
+    }
+
+    const toml::value& sub = toml::find(v, keys.front());
+    keys.pop_front();
+    return find_recursive<T>(sub, std::move(keys));
+}
+
 void TomlCreator::set_value(const String &p_label, const Variant &p_value) const {
     const std::string label_str = to_str(p_label);
     toml::value &doc = *t;
@@ -217,53 +261,53 @@ void TomlCreator::set_vec4i(const String &p_label, const Vector4i &p_value) cons
 void TomlCreator::set_variant(const String &p_label, const Variant &p_value) const { set_value(p_label, p_value); }
 
 void TomlCreator::set_int_at(const Array &p_keys, const String &p_label, const int p_value) const {
-    ensure(p_keys.size() > 0, "[gdex-toml:set_int_at] p_keys has no elements. Cannot set value.");
+    warn_if(p_keys.size() == 0, "[gdex-toml:set_int_at] p_keys has no elements. Cannot set value.");
     set_value_at(p_keys, p_label, enc(p_value));
 }
 void TomlCreator::set_float_at(const Array &p_keys, const float p_value) {
-    ensure(p_keys.size() > 0, "[gdex-toml:set_float_at] p_keys has no elements. Cannot set value.");
+    warn_if(p_keys.size() == 0, "[gdex-toml:set_float_at] p_keys has no elements. Cannot set value.");
     set_value_at<toml::value>(p_keys, enc(p_value));
 }
 void TomlCreator::set_string_at(const Array &p_keys, const String &p_value) {
-    ensure(p_keys.size() > 0, "[gdex-toml:set_string_at] p_keys has no elements. Cannot set value.");
+    warn_if(p_keys.size() == 0, "[gdex-toml:set_string_at] p_keys has no elements. Cannot set value.");
     set_value_at<toml::value>(p_keys, enc(p_value));
 }
 void TomlCreator::set_bool_at(const Array &p_keys, const bool p_value) {
-    ensure(p_keys.size() > 0, "[gdex-toml:set_bool_at] p_keys has no elements. Cannot set value.");
+    warn_if(p_keys.size() == 0, "[gdex-toml:set_bool_at] p_keys has no elements. Cannot set value.");
     set_value_at<toml::value>(p_keys, enc(p_value));
 }
 void TomlCreator::set_color_at(const Array &p_keys, const Color &p_value) {
-    ensure(p_keys.size() > 0, "[gdex-toml:set_color_at] p_keys has no elements. Cannot set value.");
+    warn_if(p_keys.size() == 0, "[gdex-toml:set_color_at] p_keys has no elements. Cannot set value.");
     set_value_at<toml::value>(p_keys, enc(p_value));
 }
 void TomlCreator::set_vec2_at(const Array &p_keys, const Vector2 &p_value) {
-    ensure(p_keys.size() > 0, "[gdex-toml:set_vec2_at] p_keys has no elements. Cannot set value.");
+    warn_if(p_keys.size() == 0, "[gdex-toml:set_vec2_at] p_keys has no elements. Cannot set value.");
     set_value_at<toml::value>(p_keys, enc(p_value));
 }
 void TomlCreator::set_vec2i_at(const Array &p_keys, const Vector2i &p_value) {
-    ensure(p_keys.size() > 0, "[gdex-toml:set_vec2i_at] p_keys has no elements. Cannot set value.");
+    warn_if(p_keys.size() == 0, "[gdex-toml:set_vec2i_at] p_keys has no elements. Cannot set value.");
     set_value_at<toml::value>(p_keys, enc(p_value));
 }
 void TomlCreator::set_vec3_at(const Array &p_keys, const Vector3 &p_value) {
-    ensure(p_keys.size() > 0, "[gdex-toml:set_vec3_at] p_keys has no elements. Cannot set value.");
+    warn_if(p_keys.size() == 0, "[gdex-toml:set_vec3_at] p_keys has no elements. Cannot set value.");
     set_value_at<toml::value>(p_keys, enc(p_value));
 }
 void TomlCreator::set_vec3i_at(const Array &p_keys, const Vector3i &p_value) {
-    ensure(p_keys.size() > 0, "[gdex-toml:set_vec3i_at] p_keys has no elements. Cannot set value.");
+    warn_if(p_keys.size() == 0, "[gdex-toml:set_vec3i_at] p_keys has no elements. Cannot set value.");
     set_value_at<toml::value>(p_keys, enc(p_value));
 }
 void TomlCreator::set_vec4_at(const Array &p_keys, const Vector4 &p_value) {
-    ensure(p_keys.size() > 0, "[gdex-toml:set_vec4_at] p_keys has no elements. Cannot set value.");
+    warn_if(p_keys.size() == 0, "[gdex-toml:set_vec4_at] p_keys has no elements. Cannot set value.");
     set_value_at<toml::value>(p_keys, enc(p_value));
 }
 
 void TomlCreator::set_vec4i_at(const Array &p_keys, const Vector4i &p_value) {
-    ensure(p_keys.size() > 0, "[gdex-toml:set_vec4i_at] p_keys has no elements. Cannot set value.");
+    warn_if(p_keys.size() == 0, "[gdex-toml:set_vec4i_at] p_keys has no elements. Cannot set value.");
     set_value_at<toml::value>(p_keys, enc(p_value));
 }
 
 void TomlCreator::set_variant_at(const Array &p_keys, const Variant &p_value) {
-    ensure(p_keys.size() > 0, "[gdex-toml:set_variant_at] p_keys has no elements. Cannot set value.");
+    warn_if(p_keys.size() == 0, "[gdex-toml:set_variant_at] p_keys has no elements. Cannot set value.");
     set_value_at<toml::value>(p_keys, enc(p_value));
 }
 
@@ -271,11 +315,13 @@ void TomlCreator::set_array(const String &p_label, const Array &p_value) const {
     toml::value arr(toml::array{});
     parse_array(arr, p_value);
     // t[to_str(p_label)] = arr;
-    t->at(to_str(p_label)) = arr;
+    // t->at(to_str(p_label)) = arr;
+    auto &doc = *t;
+    doc[to_str(p_label)] = arr;
 }
 
 void TomlCreator::set_array_at(const Array &p_keys, const Array &p_value) {
-    ensure(p_keys.size() > 0, "[gdex-toml:set_array_at] p_keys has no elements. Cannot set value.");
+    warn_if(p_keys.size() == 0, "[gdex-toml:set_array_at] p_keys has no elements. Cannot set value.");
     toml::value arr(toml::array{});
     parse_array(arr, p_value);
     set_value_at<toml::array>(p_keys, arr);
@@ -285,11 +331,12 @@ void TomlCreator::set_table(const String &p_label, const Dictionary &p_value) co
     toml::value tbl(toml::table{});
     parse_dict(tbl, p_value);
     // t[to_str(p_label)] = tbl;
-    t->at(to_str(p_label)) = tbl;
+    auto &doc = *t;
+    doc[to_str(p_label)] = tbl;
 }
 
 void TomlCreator::set_table_at(const Array &p_keys, const Dictionary &p_value) {
-    ensure(p_keys.size() > 0, "[gdex-toml:set_table_at] p_keys has no elements. Cannot set value.");
+    warn_if(p_keys.size() == 0, "[gdex-toml:set_table_at] p_keys has no elements. Cannot set value.");
     toml::value tbl(toml::table{});
     parse_dict(tbl, p_value);
     set_value_at<toml::table>(p_keys, tbl);

@@ -53,14 +53,25 @@ download_editor() {
 }
 
 download_export_templates() {
+  ver="${GODOT_VER/-/.}" # replace dash with dot
+
+  if [ ${OS} == "Linux" ]; then
+    destination="${HOME}/.local/share/godot/export_templates/${ver}"
+  elif [ ${OS} == "Windows" ]; then
+    destination="${HOME}/AppData/Roaming/Godot/export_templates/${ver}"
+  fi
+
   zip_file="Godot_v${GODOT_VER}_export_templates.tpz"
   url="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VER}/${zip_file}"
   downloaded_file="$(pwd)/${FOLDER_TEMP}/${zip_file}"
-  ver="${GODOT_VER/-/.}"
-  destination="${HOME}/.local/share/godot/export_templates/${ver}/"
+
+  echo "Download Godot export templates"
+  echo "url: ${url}"
+  echo "downloaded_file: ${downloaded_file}"
+  echo "zip_file: ${zip_file}"
+  echo "destination: ${destination}"
 
   # Check if export templates has been installed, if not install it
-  #/home/xx/.local/share/godot/export_templates/4.4.1.stable/
   if [ -d "${destination}/" ]; then
     echo "No need to download export templates for Godot ${GODOT_VER} (${ver}), they have already been installed"
   else
@@ -78,8 +89,8 @@ download_export_templates() {
       make_dir "${destination}"
       unpack "${downloaded_file}" "${destination}"
       echo "Extracted ${zip_file}"
-      mv -f "${destination}templates/"* "${destination}"
-      rm_dir "${destination}templates/"
+      mv -f "${destination}/templates/"* "${destination}"
+      rm_dir "${destination}/templates/"
     else
       die "Cannot download ${url}"
     fi

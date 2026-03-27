@@ -1,18 +1,19 @@
 #ifndef GDEX_TOML_TOML_CREATOR_H
 #define GDEX_TOML_TOML_CREATOR_H
 
-#include <godot_cpp/classes/object.hpp>
+#include <deque>
+#include <godot_cpp/classes/ref_counted.hpp>
 #include <toml.hpp>
 #include "godot_cpp/core/binder_common.hpp"
 
 using namespace godot;
 
-class TomlCreator final : public Object {
-    GDCLASS(TomlCreator, Object);
+class TomlCreator final : public RefCounted {
+    GDCLASS(TomlCreator, RefCounted);
 
 private:
-    // toml::value t = toml::ordered_table{};
     std::unique_ptr<toml::value> t;
+    bool enable_logging;
 
     static void parse_dict(toml::value &p_toml, const Dictionary &p_dict);
     static void parse_array(toml::value &p_toml, const Array &p_arr);
@@ -20,19 +21,28 @@ private:
     template<class T>
     void set_value_at(const Array &p_keys, const toml::value &p_value);
 
-    // template<class T>
     void set_value_at(const Array &      p_keys,
                       const String &     p_label,
                       const toml::value &p_value) const;
 
     void set_value(const String &p_label, const Variant &p_value) const;
 
+    bool ensure(bool condition, const std::string &message, const Array &args) const;
+    void warn_if(bool condition, const std::string &message, const Array &args) const;
+
+    template<typename T>
+    T find_recursive(const toml::value& v, std::deque<std::string> keys);
+
 protected:
     static void _bind_methods();
+
+    void log(const String &message, const Array &args) const;
 
 public:
     TomlCreator();
     ~TomlCreator() override;
+
+    void logging(bool logging);
 
     enum ArrayFormat {
         AF_DEFAULT_FORMAT = 0,

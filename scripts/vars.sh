@@ -1,19 +1,36 @@
 #!/usr/bin/env bash
 
-case $(uname | tr '[:upper:]' '[:lower:]') in
-  linux*)
-    export OS=Linux
-    ;;
-  darwin*)
-    export OS=macOS
-    ;;
-  msys*)
-    export OS=Windows
-    ;;
-  *)
-    export OS=notset
-    ;;
-esac
+#case $(uname | tr '[:upper:]' '[:lower:]') in
+#  linux*)
+#    export OS=Linux
+#    ;;
+#  darwin*)
+#    export OS=macOS
+#    ;;
+#  msys*)
+#    export OS=Windows
+#    ;;
+#  *)
+#    export OS=notset
+#    ;;
+#esac
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  export OS=Linux
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  export OS=macOS
+elif [[ "$OSTYPE" == "cygwin" ]]; then
+  export OS=Linux
+elif [[ "$OSTYPE" == "msys" ]]; then
+  export OS=Windows
+elif [[ "$OSTYPE" == "win32" ]]; then
+  # I'm not sure this can happen.
+  export OS=Windows
+elif [[ "$OSTYPE" == "freebsd"* ]]; then
+  export OS=Linux
+else
+  export OS=NOT_SET
+fi
 
 export GODOT_VER=4.6.1-stable
 export PRESET_RELEASE="${OS} Release"

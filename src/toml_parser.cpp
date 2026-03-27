@@ -3,12 +3,13 @@
 #include <cfloat>
 #include <toml.hpp>
 #include "translations.h"
-#include "../include/toml.hpp"
 #include <godot_cpp/core/class_db.hpp>
 
 using namespace godot;
 
 void TomlParser::_bind_methods() {
+    ClassDB::bind_method(D_METHOD("logging", "logging"), &TomlParser::logging);
+
     ClassDB::bind_method(D_METHOD("try_parse", "p_content"), &TomlParser::try_parse);
     ClassDB::bind_method(D_METHOD("get_string", "p_key"), &TomlParser::get_string);
     ClassDB::bind_method(D_METHOD("get_string_or", "p_key", "p_default_value"), &TomlParser::get_string_or, DEFVAL(""));
@@ -51,12 +52,30 @@ void TomlParser::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_table_at", "p_keys"), &TomlParser::get_table_at);
     ClassDB::bind_method(D_METHOD("get_array", "p_key"), &TomlParser::get_array);
     ClassDB::bind_method(D_METHOD("get_array_at", "p_keys"), &TomlParser::get_array_at);
+
+    ClassDB::bind_method(D_METHOD("key_exists", "p_key"), &TomlParser::key_exists);
+    ClassDB::bind_method(D_METHOD("path_exist", "p_keys"), &TomlParser::path_exist);
 }
 
-TomlParser::TomlParser() = default;
+TomlParser::TomlParser() {
+    // disable logging in release build
+    enable_logging = true;
+    t = std::make_unique<toml::value>();
+}
+
 TomlParser::~TomlParser() {
     // auto v = t.release();
     // v = nullptr;
+}
+
+void TomlParser::logging(bool logging) {
+    enable_logging = logging;
+}
+
+void TomlParser::log(const String &message, const Array &args = {}) const {
+    if (enable_logging) {
+        UtilityFunctions::print(message.format(args));
+    }
 }
 
 bool TomlParser::try_parse(const String &p_content) {
@@ -70,8 +89,17 @@ bool TomlParser::try_parse(const String &p_content) {
     }
 
     const auto err = parse_result.unwrap_err().at(0);
-    UtilityFunctions::print(String(format_error(err).c_str()));
+    log(String(format_error(err).c_str()));
     return false;
+}
+
+bool TomlParser::key_exists(const String &p_key) const {
+    const auto &doc = *t;
+    return doc.contains(to_str(p_key));
+}
+
+bool TomlParser::path_exist(const Array &p_keys) const {
+    return has_path(p_keys);
 }
 
 String TomlParser::get_string(const String &p_key) const {
@@ -178,7 +206,7 @@ TypedArray<Vector2> TomlParser::get_vec2_arr_at(const Array &p_keys) const {
     TypedArray<Vector2> result = {};
     for (const auto vecs = toml::get<std::vector<std::vector<float>>>(node); const auto &v : vecs) {
         if (v.size() != 2) {
-            UtilityFunctions::print(String("[ERROR] TomlParser::get_array_vector2 : Expected an array of 2 floats, but found {0}").format(Array::make(v.size())));
+            log("[ERROR] TomlParser::get_array_vector2 : Expected an array of 2 floats, but found {0}", {v.size()});
             continue;
         }
         result.append(Vector2{ dec_float(node[0]), dec_float(node[1]) });
@@ -216,7 +244,7 @@ TypedArray<Vector2i> TomlParser::get_vec2i_arr_at(const Array &p_keys) const {
     TypedArray<Vector2i> result = {};
     for (const auto vecs = toml::get<std::vector<std::vector<int>>>(node); const auto &v : vecs) {
         if (v.size() != 2) {
-            UtilityFunctions::print(String("[ERROR] TomlParser::get_array_vector2i : Expected an array of 2 ints, but found {0}").format(Array::make(v.size())));
+            log("[ERROR] TomlParser::get_array_vector2i : Expected an array of 2 ints, but found {0}", {v.size()});
             continue;
         }
         result.append(Vector2i{ dec_int(node[0]), dec_int(node[1]) });
@@ -254,7 +282,7 @@ TypedArray<Vector3> TomlParser::get_vec3_arr_at(const Array &p_keys) const {
     TypedArray<Vector3> result = {};
     for (const auto vecs = toml::get<std::vector<std::vector<float>>>(node); const auto &v : vecs) {
         if (v.size() != 3) {
-            UtilityFunctions::print(String("[ERROR] TomlParser::get_array_vector3 : Expected an array of 3 floats, but found {0}").format(Array::make(v.size())));
+            log("[ERROR] TomlParser::get_array_vector3 : Expected an array of 3 floats, but found {0}", {v.size()});
             continue;
         }
         result.append(Vector3{ dec_float(node[0]), dec_float(node[1]), dec_float(node[2]) });
@@ -292,7 +320,7 @@ TypedArray<Vector3i> TomlParser::get_vec3i_arr_at(const Array &p_keys) const {
     TypedArray<Vector3i> result = {};
     for (const auto vecs = toml::get<std::vector<std::vector<int>>>(node); const auto &v : vecs) {
         if (v.size() != 3) {
-            UtilityFunctions::print(String("[ERROR] TomlParser::get_array_vector3i : Expected an array of 3 ints, but found {0}").format(Array::make(v.size())));
+            log("[ERROR] TomlParser::get_array_vector3i : Expected an array of 3 ints, but found {0}", {v.size()});
             continue;
         }
         result.append(Vector3i{ dec_int(node[0]), dec_int(node[1]), dec_int(node[2])});
@@ -345,9 +373,7 @@ TypedArray<Color> TomlParser::get_color_arr_at(const Array &p_keys) const {
 Dictionary TomlParser::get_table(const String &p_key) const {
     const std::string key = to_str(p_key);
     if (!t->contains(key) || !t->at(key).is_table()) {
-        #ifdef DEBUG_TOML
-        UtilityFunctions::print(String("[ERROR] TomlParser::get_table : Cannot find table with key '{0}'. Return empty Dictionary.").format(Array::make(p_key)));
-        #endif
+        log("[ERROR] TomlParser::get_table : Cannot find table with key '{0}'. Return empty Dictionary.", {p_key});
         return {};
     }
     Dictionary result = {};
@@ -367,9 +393,7 @@ Dictionary TomlParser::get_table_at(const Array &p_keys) const {
 Array TomlParser::get_array(const String &p_key) const {
     const std::string key = to_str(p_key);
     if (!t->contains(key) || !t->at(key).is_array()) {
-        #ifdef DEBUG_TOML
-        UtilityFunctions::print(String("[ERROR] TomlParser::get_array : Cannot find array with key '{0}'. Return empty Array.").format(Array::make(p_key)));
-        #endif
+        log("[ERROR] TomlParser::get_array : Cannot find array with key '{0}'. Return empty Array.", {p_key});
         return {};
     }
     Array result = {};
@@ -437,22 +461,45 @@ void TomlParser::to_array(const toml::basic_value<toml::type_config> &p_value, A
     }
 }
 
-toml::value TomlParser::find_recursive(const Array &p_keys) const {
+bool TomlParser::has_path(const Array &p_keys) const {
     std::vector<toml::value> nodes = {};
-    // nodes.reserve(p_keys.size());
+    const auto &doc = *t;
 
     if (p_keys.size() == 0) {
-        #ifdef DEBUG_TOML
-        UtilityFunctions::print(String("[ERROR] TomlParser::find_recursive : No keys provided. Return."));
-        #endif
+        log("[ERROR] TomlParser::find_recursive : No keys provided. Return.");
+        return false;
+    }
+
+    const std::string first = to_str(p_keys[0]);
+    if (!doc.contains(first)) {
+        log("[ERROR] TomlParser::find_recursive : Could not find key {0} in TOML doc. Return.", {first.c_str()});
+        return false;
+    }
+
+    nodes.emplace_back(doc.at(first));
+
+    for (int i = 1, j = 0; i < p_keys.size(); i++, j++) {
+        if (!nodes[j].contains(to_str(p_keys[i]))) {
+            log("[ERROR] TomlParser::find_recursive : Could not find key {0}. Return.", {p_keys[i]});
+            return false;
+        }
+        nodes.emplace_back(nodes[j].at(to_str(p_keys[i])));
+    }
+
+    return true;
+}
+
+toml::value TomlParser::find_recursive(const Array &p_keys) const {
+    std::vector<toml::value> nodes = {};
+
+    if (p_keys.size() == 0) {
+        log("[ERROR] TomlParser::find_recursive : No keys provided. Return.");
         return {};
     }
 
     const std::string first = to_str(p_keys[0]);
     if (!t->contains(first)) {
-        #ifdef DEBUG_TOML
-        UtilityFunctions::print(String("[ERROR] TomlParser::find_recursive : Could not find key {0} in TOML doc. Return.").format(Array::make(first.c_str())));
-        #endif
+        log("[ERROR] TomlParser::find_recursive : Could not find key {0} in TOML doc. Return.", {first.c_str()});
         return {};
     }
 
@@ -460,14 +507,13 @@ toml::value TomlParser::find_recursive(const Array &p_keys) const {
 
     for (int i = 1, j = 0; i < p_keys.size(); i++, j++) {
         if (!nodes[j].contains(to_str(p_keys[i]))) {
-            #ifdef DEBUG_TOML
-            UtilityFunctions::print(String("[ERROR] TomlParser::find_recursive : Could not find key {0}. Return.").format(Array::make(p_keys[i])));
-            #endif
+            log("[ERROR] TomlParser::find_recursive : Could not find key {0}. Return.", {p_keys[i]});
             return {};
         }
         nodes.emplace_back(nodes[j].at(to_str(p_keys[i])));
     }
 
+    // Should return a reference instead?
     return nodes[nodes.size() - 1];
 }
 

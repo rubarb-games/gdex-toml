@@ -55,6 +55,7 @@ set( LIB_DIR "${CMAKE_SYSTEM_NAME}-${LIB_ARCH}" )
 set( BUILD_OUTPUT_DIR "${CMAKE_BINARY_DIR}/${PROJECT_NAME}/" )
 message( STATUS "Building ${PROJECT_NAME} for ${LIB_ARCH} on ${CMAKE_SYSTEM_NAME}")
 message( STATUS "Build output dir ${BUILD_OUTPUT_DIR}")
+message( STATUS "Build type ${CMAKE_BUILD_TYPE}")
 #set_target_properties( godot-cpp
 #    PROPERTIES
 #        CXX_VISIBILITY_PRESET hidden    # visibility needs to be the same as the main library
@@ -77,7 +78,7 @@ endif()
 message( STATUS "Rel type: ${GDEXTOML_REL_TYPE}")
 
 if(WIN32)
-    set(LIB_FILE_NAME "${PROJECT_NAME}.windows.x86_64.${GDEXTOML_REL_TYPE}.dll")
+    set(LIB_FILE_NAME "${PROJECT_NAME}.windows.x86_64.${GDEXTOML_REL_TYPE}")
 elseif(APPLE)
     set(LIB_FILE_NAME "${PROJECT_NAME}.macos.${GDEXTOML_REL_TYPE}.framework")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")

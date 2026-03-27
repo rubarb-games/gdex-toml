@@ -9,32 +9,47 @@ func _ready() -> void:
 
 func test_creator():
 	var toml: TomlCreator = TomlCreator.new()
+	toml.logging(false)
 	print("=== TomlCreator ===================\n")
 
 	toml.set_int("my_int", 1704)
 	toml.set_int("my_int", 1024) # overwrites the previously set my_int
 
-#	toml.set_int_at(["audio"], "master_volume", 100)
-	toml.set_int_at(["a", "b", "c"], "master_volume", 100)
+	var audio: Dictionary = {
+		"audio" = {
+			"master_volume" = 100
+		}
+	}
+	toml.set_table("config", audio)
 
-	toml.set_table_at(["ability", "paint_it_red"], {
-		abc = 1234,
-		hei = "sveis"
+	var abilities: Array = []
+	abilities.append({
+		"name": "Paint it red"
 	})
-#	toml.test(["ability", "gravel_everyday"], {
-#		abc = 246,
-#		hei = "hade"
-#	})
+	abilities.append({
+		"name": "Paint it blue"
+	})
+	toml.set_array("abilities", abilities)
 
 	var ts: String = toml.serialize()
 	print("toml created:\n")
 	print(ts)
 	print("---\n")
 
-#	var tp: TomlParser = TomlParser.new()
-#	tp.try_parse(ts)
+	var tp: TomlParser = TomlParser.new()
+	tp.logging(false)
+	tp.try_parse(ts)
+
+	print("has path: 'some.thing'? %s" % yesno(tp.path_exist(["some", "thing"])))
+	print("has path: 'config.audio'? %s" % yesno(tp.path_exist(["config", "audio"])))
+	print("has path: 'config.audio.master_volume'? %s" % yesno(tp.path_exist(["config", "audio", "master_volume"])))
+	print("has key: 'my_int'? %s" % yesno(tp.key_exists("my_int")))
+	print("has key: 'my_int_x'? %s" % yesno(tp.key_exists("my_int_x")))
 
 #	p("paint_it_red", tp.get_table_at(["ability", "paint_it_red"]))
+
+func yesno(b: bool) -> String:
+	return "yes" if b else "no"
 
 func test_parser():
 	var parser = TomlParser.new()
