@@ -453,6 +453,11 @@ void TomlParser::to_array(const toml::basic_value<toml::type_config> &p_value, A
         if (value.is_string()) {
             p_array.append(dec_string(value));
         }
+        if (value.is_table()) {
+            auto d = Dictionary();
+            to_dictionary(value, d);
+            p_array.append(d);
+        }
         if (value.is_array()) {
             auto arr = Array();
             to_array(value, arr);
