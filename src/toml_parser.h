@@ -88,6 +88,7 @@ public:
 
     Dictionary get_table(const String &p_key) const;
     Dictionary get_table_at(const Array &p_keys) const;
+    TypedArray<String> get_table_keys(const String &p_key) const;
 
     Array get_array(const String &p_key) const;
     Array get_array_at(const Array &p_keys) const;

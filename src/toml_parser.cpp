@@ -50,6 +50,7 @@ void TomlParser::_bind_methods() {
 
     ClassDB::bind_method(D_METHOD("get_table", "p_key"), &TomlParser::get_table);
     ClassDB::bind_method(D_METHOD("get_table_at", "p_keys"), &TomlParser::get_table_at);
+    ClassDB::bind_method(D_METHOD("get_table_keys", "p_key"), &TomlParser::get_table_keys);
     ClassDB::bind_method(D_METHOD("get_array", "p_key"), &TomlParser::get_array);
     ClassDB::bind_method(D_METHOD("get_array_at", "p_keys"), &TomlParser::get_array_at);
 
@@ -387,6 +388,15 @@ Dictionary TomlParser::get_table_at(const Array &p_keys) const {
     }
     Dictionary result = {};
     to_dictionary(node, result);
+    return result;
+}
+
+TypedArray<String> TomlParser::get_table_keys(const String &p_key) const {
+    const std::string key = to_str(p_key);
+    TypedArray<String> result = {};
+    for(const auto& [k, v] : t->at(key).as_table()) {
+        result.append(dec_string(k));
+    }
     return result;
 }
 
