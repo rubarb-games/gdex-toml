@@ -1,0 +1,51 @@
+[config]
+default_boss_intro = "prefabs/ui/bossfight/bossfight_intro"
+default_boss_outro = "prefabs/ui/bossfight/bossfight_outro"
+
+[monster.spider]
+health = 1
+icon_color = "icon_spider_extra"
+scene = "monster_spider"
+
+[monster.tentacle]
+health = 1 # Doesn't really matter. Health will be updated during play
+icon_color = "icon_spider_extra"
+scene = "tentacle/monster_tentacle"
+
+[monster.snake]
+health = 10000
+icon_color = "icon_spider_extra"
+scene = "snake/monster_snake"
+
+[monster.black_ooze]
+health = 1
+icon_color = "icon_spider_extra"
+scene = "black_ooze/black_ooze"
+
+[monster.gem_mimic]
+health = 1
+icon_color = "icon_spider_extra"
+scene = "gem_mimic/gem_mimic"
+
+[monster.elite_gem_mimic]
+health = 1
+icon_color = "icon_spider_extra"
+scene = "elite_gem_mimic/elite_gem_mimic"
+
+[monster.mutated_plant]
+health = 9
+icon_color = "icon_spider_extra"
+scene = "mutated_plant/mutated_plant"
+
+[monster.test]
+health = 4
+icon_color = "icon_item_skull"
+scene = "monster_test"
+
+# BOSSES
+
+[monster.boss_george]
+health = 12500
+scene = "bosses/george/boss_george"
+scene_outro = "bosses/george/george_death"
+scene_healthbar = "bosses/george/healthbar_george"

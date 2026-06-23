@@ -1,0 +1,396 @@
+[items]
+max_items_equipped = 9
+health_collectable_item = 1000000000 # 1 mrd
+
+# Item slots
+
+[item_slot.0]
+tier = 1
+# valid states: locked, unresearched, equipped
+default_state = "equipped"
+price = []
+equipped = "pickaxe"
+
+[item_slot.1]
+tier = 1
+default_state = "unresearched"
+price = ["gravel:300", "gold:2"]
+equipped = "horn"
+
+[item_slot.2]
+tier = 1
+default_state = "unresearched"
+price = ["gravel:1200"]
+equipped = "pickaxe"
+
+[item_slot.3]
+tier = 2
+default_state = "equipped"
+price = ["gravel:5000", "copper:4"]
+locked_by = "prosthetic_leg"
+equipped = "pickaxe"
+
+[item_slot.4]
+tier = 2
+default_state = "locked"
+price = ["gravel:10000", "gold:4"]
+locked_by = "glass_eye"
+equipped = "pickaxe"
+
+[item_slot.5]
+tier = 2
+default_state = "locked"
+price = ["gravel:10000", "gold:4"]
+locked_by = "glass_eye"
+equipped = "pickaxe"
+
+[item_slot.6]
+tier = 3
+default_state = "equipped"
+price = ["gravel:10000", "gold:4"]
+locked_by = "glass_eye"
+equipped = "pickaxe"
+
+[item_slot.7]
+tier = 3
+default_state = "locked"
+price = ["gravel:10000", "gold:4"]
+locked_by = "glass_eye"
+equipped = "pickaxe"
+
+[item_slot.8]
+tier = 3
+default_state = "locked"
+price = ["gravel:10000", "gold:4"]
+locked_by = "glass_eye"
+equipped = "pickaxe"
+
+[item_slot.9]
+tier = 3
+default_state = "locked"
+price = ["gravel:10000", "gold:4"]
+locked_by = "glass_eye"
+equipped = "pickaxe"
+
+# Item Fx
+
+# Setup the different types of Item Fx here, and reference them
+# in the item definitions.
+# When specifying item_fx = "hand_pickaxe" in an item definition,
+# the system expects to find a [item_fx.hand_pickaxe]
+
+# Enter the scene name without file ending. The system will look for 
+# the scene in prefabs/item_fx
+
+[item_fx.hand_pickaxe]
+scene = "itemfx_hand_pickaxe"
+
+[item_fx.hand_shake]
+scene = "itemfx_hand_shake"
+
+[item_fx.hand_throw]
+scene = "itemfx_hand_throw"
+
+# Items
+
+# Important! The id of the item must match a value in Enums.Item
+# item.pickaxe expects a corresponding enum called Enums.Item.PICKAXE
+
+[item.pickaxe]
+tier = 0
+icon_color = "icon_item_pickaxe"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [2, 8]
+price = ["gravel:100"]
+script = "item_pickaxe"
+item_fx = "hand_pickaxe"
+unlock_type = 1 # none, always, unlocked_by_progression, locked_in_demo
+challenge = "ALWAYS_UNLOCKED"
+
+[item.horn]
+tier = 0
+icon_color = "icon_item_horn"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [1, 8]
+price = ["gravel:500", "coal:15"]
+script = "item_horn"
+item_fx = "hand_throw"
+unlock_type = 1 #ALWAYS
+challenge = "NONE"
+
+[item.foreman_candle]
+tier = 0
+icon_color = "icon_item_lantern"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [1, 8]
+price = []
+script = "item_foreman_candle"
+item_fx = "hand_throw"
+unlock_type = 0 #LOCKED
+challenge = "NONE"
+
+[item.pesticide]
+tier = 3
+icon_color = "icon_item_pesticide"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [0, 9]
+price = ["gold:2"]
+script = "item_pesticide"
+item_fx = "hand_throw"
+unlock_type = 1 #ALWAYS
+challenge = "ALWAYS_UNLOCKED"
+
+[item.monsterfat]
+tier = 1
+icon_color = "icon_item_monster_fat"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [0, 9]
+price = ["coal:3"]
+script = "item_monsterfat"
+item_fx = "hand_throw"
+unlock_type = 0 #LOCKED
+challenge = "ALWAYS_UNLOCKED"
+
+[item.crackcharge]
+tier = 1
+icon_color = "icon_item_crack_charge"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [4, 8]
+price = ["coal:2"]
+script = "item_crackcharge"
+item_fx = "hand_throw"
+unlock_type = 1 #ALWAYS
+challenge = "ALWAYS_UNLOCKED"
+
+[item.drillcore]
+tier = 2
+icon_color = "icon_item_drill"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [4, 8]
+price = ["copper:2"]
+script = "item_drillcore"
+item_fx = "hand_throw"
+unlock_type = 1 #ALWAYS
+challenge = "ALWAYS_UNLOCKED"
+
+[item.tunnelcharge]
+tier = 2
+icon_color = "icon_item_tunnel_charge"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [4, 8]
+price = ["copper:2"]
+script = "item_tunnelcharge"
+item_fx = "hand_throw"
+unlock_type = 1 #ALWAYS
+challenge = "ALWAYS_UNLOCKED"
+
+[item.shakenstir]
+tier = 2
+icon_color = "icon_item_shake_n_stir"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [4, 8]
+price = ["copper:2"]
+script = "item_shakenstir"
+item_fx = "hand_throw"
+unlock_type = 1 #ALWAYS
+challenge = "ALWAYS_UNLOCKED"
+
+[item.greenrot]
+tier = 2
+icon_color = "icon_item_greenrot"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [4, 8]
+price = ["copper:1"]
+script = "item_greenrot"
+item_fx = "hand_throw"
+unlock_type = 1 #ALWAYS
+challenge = "ALWAYS_UNLOCKED"
+
+[item.greasedpalm]
+tier = 1
+icon_color = "icon_item_greased_palm"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [4, 8]
+price = ["coal:10"]
+script = "item_greasedpalm"
+item_fx = "hand_throw"
+unlock_type = 1 #ALWAYS
+challenge = "NONE"
+
+[item.oreslog]
+tier = 1
+icon_color = "icon_item_ore_slug"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [4, 8]
+price = ["coal:2"]
+script = "item_oreslug"
+item_fx = "hand_throw"
+unlock_type = 1 #ALWAYS
+challenge = "ALWAYS_UNLOCKED"
+
+[item.scatterslog]
+tier = 3
+icon_color = "icon_item_scatterslug"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [4, 8]
+price = ["gold:3"]
+script = "item_scatterslug"
+item_fx = "hand_throw"
+unlock_type = 1 #ALWAYS
+challenge = "ALWAYS_UNLOCKED"
+
+[item.boomkit]
+tier = 1
+icon_color = "icon_item_boomkit"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [4, 8]
+price = ["coal:3"]
+script = "item_boomkit"
+item_fx = "hand_throw"
+unlock_type = 0 #LOCKED
+challenge = "ALWAYS_UNLOCKED"
+
+[item.fusetangle]
+tier = 1
+icon_color = "icon_item_fuse_tangle"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [4, 8]
+price = ["coal:2"]
+script = "item_fusetangle"
+item_fx = "hand_throw"
+unlock_type = 1 #ALWAYS
+challenge = "ALWAYS_UNLOCKED"
+
+[item.fusecutter]
+tier = 2
+icon_color = "icon_item_fuse_cutter"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [4, 8]
+price = ["copper:2"]
+script = "item_fusecutter"
+item_fx = "hand_throw"
+unlock_type = 1 #ALWAYS
+challenge = "ALWAYS_UNLOCKED"
+
+[item.blackpowder]
+tier = 3
+icon_color = "icon_item_black_powder"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [4, 8]
+price = ["gold:2"]
+script = "item_blackpowder"
+item_fx = "hand_shake"
+unlock_type = 1 #ALWAYS
+challenge = "ALWAYS_UNLOCKED"
+
+[item.shaftpuller]
+tier = 1
+icon_color = "icon_item_shaft_puller"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [4, 8]
+price = ["coal:1"]
+script = "item_shaftpuller"
+item_fx = "hand_throw"
+unlock_type = 0 #LOCKED
+challenge = "ALWAYS_UNLOCKED"
+
+[item.goldleech]
+tier = 2
+icon_color = "icon_item_gold_leech"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [4, 8]
+price = ["copper:1"]
+script = "item_goldleech"
+item_fx = "hand_throw"
+unlock_type = 1 #ALWAYS
+challenge = "ALWAYS_UNLOCKED"
+
+[item.shiftlever]
+tier = 1
+icon_color = "icon_item_shift_lever"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [4, 8]
+price = ["coal:1"]
+script = "item_shiftlever"
+item_fx = "hand_throw"
+unlock_type = 0 #LOCKED
+challenge = "ITS_A_START"
+
+[item.bluewave]
+tier = 1
+icon_color = "icon_item_blue_wave"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [4, 8]
+price = ["coal:2"]
+script = "item_bluewave"
+item_fx = "hand_throw"
+unlock_type = 1 #ALWAYS
+challenge = "ALWAYS_UNLOCKED"
+
+[item.heavymetal]
+tier = 1
+icon_color = "icon_item_heavy_metal"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [4, 8]
+price = ["coal:2"]
+script = "item_heavymetal"
+item_fx = "hand_throw"
+unlock_type = 0 #LOCKED
+challenge = "ALWAYS_UNLOCKED"
+
+[item.causticflask]
+tier = 1
+icon_color = "icon_item_caustic_flask"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [4, 8]
+price = ["coal:2"]
+script = "item_causticflask"
+item_fx = "hand_throw"
+unlock_type = 1 #ALWAYS
+challenge = "ALWAYS_UNLOCKED"
+
+# Lost items
+
+[item.prosthetic_leg]
+tier = 1000
+icon_color = "lost_item_pro_leg"
+icon_silhouette = "specials/lost_item_pro_leg_special"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [3, 7]
+price = ["gravel:10000", "copper:500", "gold:50"]
+challenge = "ALWAYS_UNLOCKED"
+
+
+[item.glass_eye]
+tier = 1000
+icon_color = "lost_item_glass_eye"
+icon_silhouette = "specials/lost_item_glass_eye_special"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [4, 7]
+price = ["gravel:10000", "copper:500", "gold:50"]
+challenge = "ALWAYS_UNLOCKED"
+
+[item.ball_peen_hammer]
+tier = 1000
+icon_color = "lost_item_ball_peen_hammer"
+icon_silhouette = "specials/lost_item_ball_peen_hammer_special"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [8, 7]
+price = ["gravel:10000", "copper:500", "gold:50"]
+challenge = "ALWAYS_UNLOCKED"
+
+[item.brass_calipers]
+tier = 1000
+icon_color = "lost_item_brass_calipers"
+icon_silhouette = "specials/lost_item_brass_calipers_special"
+icon_closeup = "closeup/icon_item_closeup_placeholder"
+atlas_pos = [9, 7]
+price = ["gravel:10000", "copper:500", "gold:50"]
+challenge = "ALWAYS_UNLOCKED"
+
+[item.treasure_chest]
+tier = 1000
+icon_color = "icon_treasure_chest"
+atlas_pos = [6, 10]
+price = ["gravel:10000", "copper:500", "gold:50"]
+challenge = "ALWAYS_UNLOCKED"

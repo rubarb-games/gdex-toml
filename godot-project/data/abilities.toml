@@ -1,0 +1,118 @@
+[config]
+# config that applies to all abilities
+
+[ability.chain_gang]
+icon_color = "icon_ability_chain_gang"
+icon_silhouette = "specials/icon_ability_chain_gang_special"
+script = "chain_gang"
+challenge = "ALWAYS_UNLOCKED"
+
+[ability.beginners_luck]
+icon_color = "icon_ability_double_on_first"
+icon_silhouette = "specials/icon_ability_double_on_first_special"
+script = "double_on_first"
+challenge = "ALWAYS_UNLOCKED"
+
+[ability.dying_light]
+icon_color = "icon_ability_dying_light"
+icon_silhouette = "specials/icon_ability_dying_light_special"
+script = "dying_light"
+challenge = "ALWAYS_UNLOCKED"
+
+[ability.five_on_three]
+icon_color = "icon_ability_five_on_three"
+icon_silhouette = "specials/icon_ability_five_on_three_special"
+script = "five_on_three"
+challenge = "ALWAYS_UNLOCKED"
+
+[ability.gem_sniper]
+icon_color = "icon_ability_gem_sniper"
+icon_silhouette = "specials/icon_ability_gem_sniper_special"
+script = "gem_sniper"
+challenge = "ALWAYS_UNLOCKED"
+
+[ability.gravel_everyday]
+icon_color = "icon_ability_gravel_everyday"
+icon_silhouette = "specials/icon_ability_gravel_everyday_special"
+script = "gravel_everyday"
+challenge = "ALWAYS_UNLOCKED"
+
+[ability.twin_spark]
+icon_color = "icon_ability_move_on_multiple"
+icon_silhouette = "specials/icon_ability_move_on_multiple_special"
+script = "twinspark"
+challenge = "ALWAYS_UNLOCKED"
+
+[ability.paint_it_red]
+icon_color = "icon_ability_paint_it_red"
+icon_silhouette = "specials/icon_ability_paint_it_red_special"
+script = "paint_it_red"
+challenge = "ALWAYS_UNLOCKED"
+
+[ability.payday]
+icon_color = "icon_ability_payday"
+icon_silhouette = "specials/icon_ability_payday_special"
+script = "payday"
+challenge = "ALWAYS_UNLOCKED"
+
+[ability.gold_sniper]
+icon_color = "icon_ability_gold_sniper"
+icon_silhouette = "specials/icon_ability_gem_sniper_special"
+script = "gold_sniper"
+challenge = "TOO_DEEP"
+
+[ability.steady_hands]
+icon_color = "icon_ability_steady_hands"
+icon_silhouette = "specials/icon_ability_payday_special"
+script = "steady_hands"
+challenge = "ALWAYS_UNLOCKED"
+
+[ability.short_fuse]
+icon_color = "icon_ability_short_fuse"
+icon_silhouette = "specials/icon_ability_payday_special"
+script = "short_fuse"
+challenge = "ALWAYS_UNLOCKED"
+
+[ability.hoarder]
+icon_color = "icon_ability_hoarder"
+icon_silhouette = "specials/icon_ability_payday_special"
+script = "horder"
+challenge = "ALWAYS_UNLOCKED"
+
+[ability.scrapyield]
+icon_color = "icon_ability_scrap_yield"
+icon_silhouette = "specials/icon_ability_payday_special"
+script = "scrapyield"
+challenge = "ALWAYS_UNLOCKED"
+
+[ability.loose_ends]
+name = "Loose Ends"
+description = "Advance to the next level when only one objective remains"
+icon_color = "icon_ability_loose_ends"
+icon_silhouette = "specials/icon_ability_loose_ends_special"
+script = "loose_ends"
+challenge = "NONE"
+
+[ability.bomb_cache]
+icon_color = "icon_ability_bomb_cache"
+icon_silhouette = "specials/icon_ability_bomb_cache_special"
+script = "bomb_cache"
+challenge = "EARLY_LEVEL_10"
+
+[ability.front_loaded]
+icon_color = "icon_ability_front_loaded"
+icon_silhouette = "specials/icon_ability_front_loaded_special"
+script = "front_loaded"
+challenge = "ALWAYS_UNLOCKED"
+
+[ability.brown_detonator]
+icon_color = "icon_ability_brown_detonator"
+icon_silhouette = "specials/icon_ability_brown_detonator_special"
+script = "brown_detonator"
+challenge = "ALWAYS_UNLOCKED"
+
+[ability.death_blast]
+icon_color = "icon_ability_death_blast"
+icon_silhouette = "specials/icon_ability_death_blast_special"
+script = "death_blast"
+challenge = "ALWAYS_UNLOCKED"

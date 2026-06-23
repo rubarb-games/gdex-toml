@@ -1,0 +1,212 @@
+[config]
+# any common settings for all bombs
+
+
+# Important! The id of the bomb must match a value in Enums.GemType
+# [bomb.line] expects an enum called GemType.BOMB_LINE
+# 
+# script = Looks for a script in 'scripts/bombs/' called 'bomb_xxx.gd' where xxx
+#          is the part you entered. So, script = "line" will point to
+#          'scripts/bombs/bomb_line.gd'
+# icon_xx =            optionals. if 'icon_color' is missing, a picture of 
+#                      Jack will be inserted
+# price and currency = optional. If missing, an empty price table will be
+#                      inserted, making the bomb free to purchase
+
+[bomb.causticflask]
+category = "OTHER"
+icon_color = "icon_bomb_crossswap_B"
+icon_silhouette = "specials/icon_bomb_crossswap_B_special"
+atlas_pos = [6, 7]
+price = ["gravel:100"]
+script = "causticflask"
+challenge = "NONE"
+
+[bomb.monsterfat]
+category = "OTHER"
+icon_color = "icon_bomb_crossswap_B"
+icon_silhouette = "specials/icon_bomb_crossswap_B_special"
+atlas_pos = [6, 7]
+price = ["gravel:100"]
+script = "monsterfat"
+challenge = "NONE"
+
+[bomb.oreblaster]
+category = "FOUR"
+icon_color = "icon_bomb_orebuster"
+icon_silhouette = "specials/icon_bomb_orebuster_special"
+atlas_pos = [2, 7]
+price = ["gravel:100"]
+script = "oreblaster"
+challenge = "ALWAYS_UNLOCKED"
+
+[bomb.squareswap]
+category = "CROSS"
+icon_color = "icon_bomb_squareswap"
+icon_silhouette = "specials/icon_bomb_squareswap_special"
+atlas_pos = [0, 7]
+price = ["gravel:100"]
+script = "squareswap"
+challenge = "ALWAYS_UNLOCKED"
+
+[bomb.colorswap]
+category = "FIVE"
+icon_color = "icon_bomb_colorswap"
+icon_silhouette = "specials/icon_bomb_colorswap_special"
+atlas_pos = [1, 7]
+price = ["gravel:100"]
+script = "colorswap"
+challenge = "ALWAYS_UNLOCKED"
+
+[bomb.line]
+category = "FIVE"
+icon_color = "icon_bomb_line"
+icon_silhouette = "specials/icon_bomb_line_special"
+atlas_pos = [2, 6]
+price = ["gravel:100"]
+script = "line"
+challenge = "ALWAYS_UNLOCKED"
+
+[bomb.standard]
+category = "FOUR"
+icon_color = "icon_bomb_generic"
+icon_silhouette = "specials/icon_bomb_generic_special"
+atlas_pos = [0, 6]
+price = ["gravel:100"]
+script = "standard"
+challenge = "ALWAYS_UNLOCKED"
+
+[bomb.escalator]
+category = "OTHER"
+icon_color = "icon_bomb_escalator"
+icon_silhouette = "specials/icon_bomb_escalator_special"
+atlas_pos = [3, 6]
+price = ["gravel:100"]
+script = "escalator"
+challenge = "MY_EYES"
+
+[bomb.dynamite]
+category = "CROSS"
+icon_color = "icon_bomb_dynamite"
+icon_silhouette = "specials/icon_bomb_dynamite_special"
+atlas_pos = [1, 6]
+price = ["gravel:100"]
+script = "dynamite"
+challenge = "ALWAYS_UNLOCKED"
+
+[bomb.fizzle]
+category = "CROSS"
+icon_color = "icon_bomb_fizzle"
+icon_silhouette = "specials/icon_bomb_fizzle_special"
+atlas_pos = [4, 6]
+price = ["gravel:100"]
+script = "fizzle"
+challenge = "ALWAYS_UNLOCKED"
+
+[bomb.swapdirection]
+category = "FOUR"
+icon_color = "icon_bomb_swapdirection"
+icon_silhouette = "specials/icon_bomb_swapdirection_special"
+atlas_pos = [5, 6]
+price = ["gravel:100"]
+script = "swapdirection"
+challenge = "ALWAYS_UNLOCKED"
+
+[bomb.crossswap]
+category = "OTHER"
+icon_color = "icon_bomb_crossswap"
+icon_silhouette = "specials/icon_bomb_crossswap_special"
+atlas_pos = [6, 6]
+price = ["gravel:100"]
+script = "crossswap"
+challenge = "ALWAYS_UNLOCKED"
+
+[bomb.delayedblast]
+category = "FIVE"
+icon_color = "icon_bomb_delayedblast"
+icon_silhouette = "specials/icon_bomb_delayedblast_special"
+atlas_pos = [7, 6]
+price = ["gravel:100"]
+script = "delayedblast"
+challenge = "ALWAYS_UNLOCKED"
+
+[bomb.gnawcharge]
+category = "FOUR"
+icon_color = "icon_bomb_gnaw_charge"
+icon_silhouette = "specials/icon_bomb_delayedblast_special"
+atlas_pos = [8, 6]
+price = ["gravel:100"]
+script = "gnawcharge"
+challenge = "BRING_IT_DOWN"
+
+[bomb.deadmancharge]
+category = "OTHER"
+icon_color = "icon_bomb_dead_mans_charge"
+icon_silhouette = "specials/icon_bomb_dead_mans_charge_special"
+atlas_pos = [12, 6]
+price = ["gravel:100"]
+script = "deadmancharge"
+challenge = "ALWAYS_UNLOCKED"
+
+[bomb.shaftcharge]
+category = "OTHER"
+icon_color = "icon_bomb_shaft_charge"
+icon_silhouette = "specials/icon_bomb_delayedblast_special"
+atlas_pos = [11, 6]
+price = ["gravel:100"]
+script = "shaftcharge"
+challenge = "ALWAYS_UNLOCKED"
+
+[bomb.glitterbomb]
+category = "FIVE"
+icon_color = "icon_bomb_glitter_bomb"
+icon_silhouette = "specials/icon_bomb_delayedblast_special"
+atlas_pos = [9, 6]
+price = ["gravel:100"]
+script = "glitterbomb"
+challenge = "ALWAYS_UNLOCKED"
+
+[bomb.churncharge]
+category = "FIVE"
+icon_color = "icon_bomb_churn_charge"
+icon_silhouette = "specials/icon_bomb_delayedblast_special"
+atlas_pos = [10, 6]
+price = ["gravel:100"]
+script = "churncharge"
+challenge = "ALWAYS_UNLOCKED"
+
+[bomb.bigtwentyfour]
+category = "FIVE"
+icon_color = "icon_bomb_bigtwentyfour"
+icon_silhouette = "specials/icon_bomb_bigtwentyfour_special"
+atlas_pos = [14, 6]
+price = ["gravel:100"]
+script = "bigtwentyfour"
+challenge = "ALWAYS_UNLOCKED"
+
+[bomb.bluebox]
+category = "FOUR"
+icon_color = "icon_bomb_bluebox"
+icon_silhouette = "specials/icon_bomb_bluebox_special"
+atlas_pos = [15, 6]
+price = ["gravel:100"]
+script = "bluebox"
+challenge = "ALWAYS_UNLOCKED"
+
+[bomb.strobomb]
+category = "CROSS"
+icon_color = "icon_bomb_strobomb"
+icon_silhouette = "specials/icon_bomb_strobomb_special"
+atlas_pos = [10, 7]
+price = ["gravel:100"]
+script = "strobomb"
+challenge = "ALWAYS_UNLOCKED"
+
+[bomb.proximitycharge]
+category = "OTHER"
+icon_color = "icon_bomb_amber"
+icon_silhouette = "specials/icon_bomb_amber_special"
+atlas_pos = [7, 8]
+price = ["gravel:100"]
+script = "proximitycharge"
+challenge = "ALWAYS_UNLOCKED"
