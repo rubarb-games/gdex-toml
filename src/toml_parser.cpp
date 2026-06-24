@@ -394,6 +394,12 @@ Dictionary TomlParser::get_table_at(const Array &p_keys) const {
 TypedArray<String> TomlParser::get_table_keys(const String &p_key) const {
     const std::string key = to_str(p_key);
     TypedArray<String> result = {};
+    if (!t->contains(key)) {
+        return result;
+    }
+    if (!t->at(key).is_table()) {
+        return result;
+    }
     for(const auto& [k, v] : t->at(key).as_table()) {
         result.append(dec_string(k));
     }
