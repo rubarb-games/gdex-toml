@@ -1,61 +1,97 @@
 ﻿#include "toml_parser.h"
 
 #include <cfloat>
+#include <ranges>
 #include <toml.hpp>
 #include "translations.h"
 #include <godot_cpp/core/class_db.hpp>
 
 using namespace godot;
 
+// const int8_t OK = 0;
+constexpr int8_t ERR_INCORRECT_TYPE = 1;
+constexpr int8_t ERR_INCORRECT_FORMAT = 2;
+constexpr int8_t ERR_KEY_EMPTY = 10;
+constexpr int8_t ERR_KEY_NOT_FOUND = 11;
+constexpr int8_t ERR_KEY_MISSING = 12;
+constexpr int8_t ERR_NODE_EMPTY = 20;
+
 void TomlParser::_bind_methods() {
     ClassDB::bind_method(D_METHOD("logging", "logging"), &TomlParser::logging);
-
     ClassDB::bind_method(D_METHOD("try_parse", "p_content"), &TomlParser::try_parse);
+
     ClassDB::bind_method(D_METHOD("get_string", "p_key"), &TomlParser::get_string);
     ClassDB::bind_method(D_METHOD("get_string_or", "p_key", "p_default_value"), &TomlParser::get_string_or, DEFVAL(""));
     ClassDB::bind_method(D_METHOD("get_string_at", "p_keys"), &TomlParser::get_string_at);
+    ClassDB::bind_method(D_METHOD("get_string_at_or", "p_keys", "p_default_value"), &TomlParser::get_string_at_or, DEFVAL(""));
+    ClassDB::bind_method(D_METHOD("get_string_arr", "p_key"), &TomlParser::get_string_arr);
     ClassDB::bind_method(D_METHOD("get_string_arr_at", "p_keys"), &TomlParser::get_string_arr_at);
+
     ClassDB::bind_method(D_METHOD("get_int", "p_key"), &TomlParser::get_int);
-    ClassDB::bind_method(D_METHOD("get_int_or", "p_key", "p_default_value"), &TomlParser::get_int_or, DEFVAL(""));
+    ClassDB::bind_method(D_METHOD("get_int_or", "p_key", "p_default_value"), &TomlParser::get_int_or, DEFVAL(0));
     ClassDB::bind_method(D_METHOD("get_int_at", "p_keys"), &TomlParser::get_int_at);
+    ClassDB::bind_method(D_METHOD("get_int_at_or", "p_keys", "p_default_value"), &TomlParser::get_int_at_or, DEFVAL(0));
+    ClassDB::bind_method(D_METHOD("get_int_arr", "p_key"), &TomlParser::get_int_arr);
     ClassDB::bind_method(D_METHOD("get_int_arr_at", "p_keys"), &TomlParser::get_int_arr_at);
+
     ClassDB::bind_method(D_METHOD("get_float", "p_key"), &TomlParser::get_float);
-    ClassDB::bind_method(D_METHOD("get_float_or", "p_key", "p_default_value"), &TomlParser::get_float_or, DEFVAL(""));
+    ClassDB::bind_method(D_METHOD("get_float_or", "p_key", "p_default_value"), &TomlParser::get_float_or, DEFVAL(0.0));
     ClassDB::bind_method(D_METHOD("get_float_at", "p_keys"), &TomlParser::get_float_at);
+    ClassDB::bind_method(D_METHOD("get_float_at_or", "p_keys", "p_default_value"), &TomlParser::get_float_at_or, DEFVAL(0.0));
+    ClassDB::bind_method(D_METHOD("get_float_arr", "p_keys"), &TomlParser::get_float_arr);
     ClassDB::bind_method(D_METHOD("get_float_arr_at", "p_keys"), &TomlParser::get_float_arr_at);
+
     ClassDB::bind_method(D_METHOD("get_bool", "p_key"), &TomlParser::get_bool);
-    ClassDB::bind_method(D_METHOD("get_bool_or", "p_key", "p_default_value"), &TomlParser::get_bool_or, DEFVAL(""));
+    ClassDB::bind_method(D_METHOD("get_bool_or", "p_key", "p_default_value"), &TomlParser::get_bool_or, DEFVAL(false));
     ClassDB::bind_method(D_METHOD("get_bool_at", "p_keys"), &TomlParser::get_bool_at);
+    ClassDB::bind_method(D_METHOD("get_bool_at_or", "p_keys", "p_default_value"), &TomlParser::get_bool_at_or, DEFVAL(false));
+    ClassDB::bind_method(D_METHOD("get_bool_arr", "p_key"), &TomlParser::get_bool_arr);
     ClassDB::bind_method(D_METHOD("get_bool_arr_at", "p_keys"), &TomlParser::get_bool_arr_at);
+
     ClassDB::bind_method(D_METHOD("get_vec2", "p_key"), &TomlParser::get_vec2);
-    ClassDB::bind_method(D_METHOD("get_vec2_or", "p_key", "p_default_value"), &TomlParser::get_vec2_or, DEFVAL(""));
+    ClassDB::bind_method(D_METHOD("get_vec2_or", "p_key", "p_default_value"), &TomlParser::get_vec2_or, DEFVAL(Vector2{}));
     ClassDB::bind_method(D_METHOD("get_vec2_at", "p_keys"), &TomlParser::get_vec2_at);
+    ClassDB::bind_method(D_METHOD("get_vec2_at_or", "p_keys", "p_default_value"), &TomlParser::get_vec2_at_or, DEFVAL(Vector2{}));
+    ClassDB::bind_method(D_METHOD("get_vec2_arr", "p_keys"), &TomlParser::get_vec2_arr);
     ClassDB::bind_method(D_METHOD("get_vec2_arr_at", "p_keys"), &TomlParser::get_vec2_arr_at);
+
     ClassDB::bind_method(D_METHOD("get_vec2i", "p_key"), &TomlParser::get_vec2i);
-    ClassDB::bind_method(D_METHOD("get_vec2i_or", "p_key", "p_default_value"), &TomlParser::get_vec2i_or, DEFVAL(""));
+    ClassDB::bind_method(D_METHOD("get_vec2i_or", "p_key", "p_default_value"), &TomlParser::get_vec2i_or, DEFVAL(Vector2i{}));
     ClassDB::bind_method(D_METHOD("get_vec2i_at", "p_keys"), &TomlParser::get_vec2i_at);
+    ClassDB::bind_method(D_METHOD("get_vec2i_at_or", "p_keys", "p_default_value"), &TomlParser::get_vec2i_at_or, DEFVAL(Vector2i{}));
+    ClassDB::bind_method(D_METHOD("get_vec2i_arr", "p_key"), &TomlParser::get_vec2i_arr);
     ClassDB::bind_method(D_METHOD("get_vec2i_arr_at", "p_keys"), &TomlParser::get_vec2i_arr_at);
+
     ClassDB::bind_method(D_METHOD("get_vec3", "p_key"), &TomlParser::get_vec3);
-    ClassDB::bind_method(D_METHOD("get_vec3_or", "p_key", "p_default_value"), &TomlParser::get_vec3_or, DEFVAL(""));
+    ClassDB::bind_method(D_METHOD("get_vec3_or", "p_key", "p_default_value"), &TomlParser::get_vec3_or, DEFVAL(Vector3{}));
     ClassDB::bind_method(D_METHOD("get_vec3_at", "p_keys"), &TomlParser::get_vec3_at);
+    ClassDB::bind_method(D_METHOD("get_vec3_at_or", "p_keys", "p_default_value"), &TomlParser::get_vec3_at_or, DEFVAL(Vector3{}));
+    ClassDB::bind_method(D_METHOD("get_vec3_arr", "p_key"), &TomlParser::get_vec3_arr);
     ClassDB::bind_method(D_METHOD("get_vec3_arr_at", "p_keys"), &TomlParser::get_vec3_arr_at);
+
     ClassDB::bind_method(D_METHOD("get_vec3i", "p_key"), &TomlParser::get_vec3i);
-    ClassDB::bind_method(D_METHOD("get_vec3i_or", "p_key", "p_default_value"), &TomlParser::get_vec3i_or, DEFVAL(""));
+    ClassDB::bind_method(D_METHOD("get_vec3i_or", "p_key", "p_default_value"), &TomlParser::get_vec3i_or, DEFVAL(Vector3i{}));
     ClassDB::bind_method(D_METHOD("get_vec3i_at", "p_keys"), &TomlParser::get_vec3i_at);
+    ClassDB::bind_method(D_METHOD("get_vec3i_at_or", "p_keys", "p_default_value"), &TomlParser::get_vec3i_at_or, DEFVAL(Vector3i{}));
+    ClassDB::bind_method(D_METHOD("get_vec3i_arr", "p_key"), &TomlParser::get_vec3i_arr);
     ClassDB::bind_method(D_METHOD("get_vec3i_arr_at", "p_keys"), &TomlParser::get_vec3i_arr_at);
+
     ClassDB::bind_method(D_METHOD("get_color", "p_key"), &TomlParser::get_color);
-    ClassDB::bind_method(D_METHOD("get_color_or", "p_key", "p_default_value"), &TomlParser::get_color_or, DEFVAL(""));
+    ClassDB::bind_method(D_METHOD("get_color_or", "p_key", "p_default_value"), &TomlParser::get_color_or, DEFVAL(Color{}));
     ClassDB::bind_method(D_METHOD("get_color_at", "p_keys"), &TomlParser::get_color_at);
+    ClassDB::bind_method(D_METHOD("get_color_at_or", "p_keys", "p_default_value"), &TomlParser::get_color_at_or, DEFVAL(Color{}));
+    ClassDB::bind_method(D_METHOD("get_color_arr", "p_key"), &TomlParser::get_color_arr);
     ClassDB::bind_method(D_METHOD("get_color_arr_at", "p_keys"), &TomlParser::get_color_arr_at);
 
     ClassDB::bind_method(D_METHOD("get_table", "p_key"), &TomlParser::get_table);
     ClassDB::bind_method(D_METHOD("get_table_at", "p_keys"), &TomlParser::get_table_at);
     ClassDB::bind_method(D_METHOD("get_table_keys", "p_key"), &TomlParser::get_table_keys);
+
     ClassDB::bind_method(D_METHOD("get_array", "p_key"), &TomlParser::get_array);
     ClassDB::bind_method(D_METHOD("get_array_at", "p_keys"), &TomlParser::get_array_at);
 
     ClassDB::bind_method(D_METHOD("key_exists", "p_key"), &TomlParser::key_exists);
-    ClassDB::bind_method(D_METHOD("path_exist", "p_keys"), &TomlParser::path_exist);
+    ClassDB::bind_method(D_METHOD("path_exists", "p_keys"), &TomlParser::path_exists);
 }
 
 TomlParser::TomlParser() {
@@ -79,6 +115,28 @@ void TomlParser::log(const String &message, const Array &args = {}) const {
     }
 }
 
+void TomlParser::log_error_code(int8_t code) const {
+    switch (code) {
+        case ERR_INCORRECT_TYPE:
+            log("[ERROR] TomlParser :: Incorrect type");
+            break;
+        case ERR_KEY_EMPTY:
+            log("[ERROR] TomlParser :: Empty key");
+            break;
+        case ERR_KEY_NOT_FOUND:
+            log("[ERROR] TomlParser :: Key not found");
+            break;
+        case ERR_KEY_MISSING:
+            log("[ERROR] TomlParser :: Missing key");
+            break;
+        case ERR_NODE_EMPTY:
+            log("[ERROR] TomlParser :: Node is empty");
+            break;
+        default:
+            break;
+    }
+}
+
 bool TomlParser::try_parse(const String &p_content) {
     // what happens if you try to parse a new string and t is not null?
     const auto parse_result = toml::try_parse_str(to_str(p_content));
@@ -99,332 +157,1046 @@ bool TomlParser::key_exists(const String &p_key) const {
     return doc.contains(to_str(p_key));
 }
 
-bool TomlParser::path_exist(const Array &p_keys) const {
+bool TomlParser::path_exists(const Array &p_keys) const {
     return has_path(p_keys);
 }
 
+
+
+// String
+// #############################################################################
+
+
 String TomlParser::get_string(const String &p_key) const {
-    return get_string_or(p_key, "");
+    return get_string_or(p_key);
 }
+
 String TomlParser::get_string_or(const String &p_key, const String &p_default_value) const {
-    return {toml::find_or<std::string>(*t, to_str(p_key), to_str(p_default_value)).c_str()};
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return default {1}.", { p_key, p_default_value });
+        return p_default_value;
+    }
+    String str;
+    if (const int8_t code = to_string(node, str); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to cast node at key '{0}' to String. Return empty string.", { p_key });
+        return {};
+    }
+    return str;
 }
 
 String TomlParser::get_string_at(const Array &p_keys) const {
-    const toml::value node = find_recursive(p_keys);
-    if (node.is_empty() or !node.is_string()) {
+    return get_string_at_or(p_keys);
+}
+
+String TomlParser::get_string_at_or(const Array &p_keys, const String &p_default_value) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return default {1}.", { path_as_string(p_keys), p_default_value });
+        return p_default_value;
+    }
+    String str;
+    if (const int8_t code = to_string(node, str); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to cast node at path '{0}' to String. Return empty string.", { path_as_string(p_keys) });
         return {};
     }
-    return dec_string(node);
+    return str;
 }
-TypedArray<String> TomlParser::get_string_arr_at(const Array &p_keys) const {
-    const toml::value node = find_recursive(p_keys);
-    if (node.is_empty() or !node.is_array()) {
+
+TypedArray<String> TomlParser::get_string_arr(const String &p_key) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return empty Array[String].", { p_key });
+        return {};
+    }
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at key '{0}' is not an array. Return empty Array[String].", { p_key });
         return {};
     }
 
     TypedArray<String> result = {};
-    for (const auto arr = toml::get<std::vector<std::string>>(node); const auto &val : arr) {
-        result.append(dec_string(val));
+    int elm = 0;
+    // node should be an array of arrays
+    for (const auto& value : node.as_array()) {
+        String str;
+        if (const int8_t code = to_string(value, str); code != OK) {
+            log_error_code(code);
+            log("[ERROR] TomlParser : Failed to cast element {0} at key '{1}' to String. Element is ignored.", {elm, p_key});
+            continue;
+        }
+        result.append(str);
+        elm++;
     }
     return result;
 }
 
-int64_t TomlParser::get_int(const String &p_key) const {
-    return get_int_or(p_key, INT64_MIN);
-}
-int64_t TomlParser::get_int_or(const String &p_key, const int64_t p_default_value) const {
-    return toml::find_or<int64_t>(*t, to_str(p_key), p_default_value);
-}
-int64_t TomlParser::get_int_at(const Array &p_keys) const {
-    const toml::value node = find_recursive(p_keys);
-    if (node.is_empty() or !node.is_integer()) {
-        return INT64_MIN;
-    }
-    return toml::get<int64_t>(node);
-}
-TypedArray<int64_t> TomlParser::get_int_arr_at(const Array &p_keys) const {
-    return FIND_TYPED_ARR<int64_t>(p_keys);
-}
-
-float TomlParser::get_float(const String &p_key) const {
-    return get_float_or(p_key, FLT_MIN);
-}
-float TomlParser::get_float_or(const String &p_key, const float p_default_value) const {
-    return toml::find_or<float>(*t, to_str(p_key), p_default_value);
-}
-float TomlParser::get_float_at(const Array &p_keys) const {
-    const toml::value node = find_recursive(p_keys);
-    if (node.is_empty() or !node.is_floating()) {
-        return FLT_MIN;
-    }
-    return toml::get<float>(node);
-}
-TypedArray<float> TomlParser::get_float_arr_at(const Array &p_keys) const {
-    return FIND_TYPED_ARR<float>(p_keys);
-}
-
-bool TomlParser::get_bool(const String &p_key) const {
-    return get_bool_or(p_key, false);
-}
-bool TomlParser::get_bool_or(const String &p_key, const int p_default_value) const {
-    return toml::find_or<bool>(*t, to_str(p_key), p_default_value);
-}
-bool TomlParser::get_bool_at(const Array &p_keys) const {
-    toml::value node = find_recursive(p_keys);
-    if (node.is_empty() or !node.is_boolean()) {
-        return false;
-    }
-    return node.as_boolean();
-}
-TypedArray<bool> TomlParser::get_bool_arr_at(const Array &p_keys) const {
-    return FIND_TYPED_ARR<bool>(p_keys);
-}
-
-Vector2 TomlParser::get_vec2(const String &p_key) const {
-    return get_vec2_or(p_key, {});
-}
-Vector2 TomlParser::get_vec2_or(const String &p_key, const Vector2 p_default_value) const {
-    auto val = toml::find<std::vector<float>>(*t, to_str(p_key));
-    if (val.empty() or val.size() != 2) {
-        return p_default_value;
-    }
-    return { val[0], val[1] };
-}
-Vector2 TomlParser::get_vec2_at(const Array &p_keys) const {
-    auto node = find_recursive(p_keys);
-    if (node.is_empty() or node.size() != 2) {
+TypedArray<String> TomlParser::get_string_arr_at(const Array &p_keys) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return empty Array[String].", { path_as_string(p_keys) });
         return {};
     }
-    return { dec_float(node[0]), dec_float(node[1]) };
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at path '{0}' is not an array. Return empty Array[String].", { path_as_string(p_keys) });
+        return {};
+    }
+
+    TypedArray<String> result = {};
+    int elm = 0;
+    // node should be an array of arrays
+    for (const auto& value : node.as_array()) {
+        String str;
+        if (const int8_t code = to_string(value, str); code != OK) {
+            log_error_code(code);
+            log("[ERROR] TomlParser : Failed to cast element {0} at path '{1}' to String. Element is ignored.", {elm, path_as_string(p_keys)});
+            continue;
+        }
+        result.append(str);
+        elm++;
+    }
+    return result;
 }
-TypedArray<Vector2> TomlParser::get_vec2_arr_at(const Array &p_keys) const {
-    const toml::value node = find_recursive(p_keys);
-    if (node.is_empty()) {
+
+
+// int
+// #############################################################################
+
+
+int64_t TomlParser::get_int(const String &p_key) const {
+    return get_int_or(p_key);
+}
+
+int64_t TomlParser::get_int_or(const String &p_key, const int64_t &p_default_value) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return default {1}.", { p_key, p_default_value });
+        return p_default_value;
+    }
+    int64_t i;
+    if (const int8_t code = to_int(node, i); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to cast node at key '{0}' to int. Return 0.", { p_key });
+        return {};
+    }
+    return i;
+}
+
+int64_t TomlParser::get_int_at(const Array &p_keys) const {
+    return get_int_at_or(p_keys);
+}
+
+int64_t TomlParser::get_int_at_or(const Array &p_keys, const int64_t &p_default_value) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return default {1}.", { path_as_string(p_keys), p_default_value });
+        return p_default_value;
+    }
+    int64_t i;
+    if (const int8_t code = to_int(node, i); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to cast node at path '{0}' to int. Return 0.", { path_as_string(p_keys) });
+        return {};
+    }
+    return i;
+}
+
+TypedArray<int64_t> TomlParser::get_int_arr(const String &p_key) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return empty Array[int].", { p_key });
+        return {};
+    }
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at key '{0}' is not an array. Return empty Array[int].", { p_key });
+        return {};
+    }
+
+    TypedArray<int64_t> result = {};
+    int elm = 0;
+    // node should be an array of arrays
+    for (const auto& value : node.as_array()) {
+        int64_t i;
+        if (const int8_t code = to_int(value, i); code != OK) {
+            log_error_code(code);
+            log("[ERROR] TomlParser : Failed to cast element {0} at key '{1}' to int. Element is ignored.", {elm, p_key});
+            continue;
+        }
+        result.append(i);
+        elm++;
+    }
+    return result;
+}
+
+TypedArray<int64_t> TomlParser::get_int_arr_at(const Array &p_keys) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return empty Array[int].", { path_as_string(p_keys) });
+        return {};
+    }
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at path '{0}' is not an array. Return empty Array[int].", { path_as_string(p_keys) });
+        return {};
+    }
+
+    TypedArray<int64_t> result = {};
+    int elm = 0;
+    // node should be an array of arrays
+    for (const auto& value : node.as_array()) {
+        int64_t i;
+        if (const int8_t code = to_int(value, i); code != OK) {
+            log_error_code(code);
+            log("[ERROR] TomlParser : Failed to cast element {0} at path '{1}' to int. Element is ignored.", {elm, path_as_string(p_keys)});
+            continue;
+        }
+        result.append(i);
+        elm++;
+    }
+    return result;
+}
+
+
+// float
+// #############################################################################
+
+
+float TomlParser::get_float(const String &p_key) const {
+    return get_float_or(p_key);
+}
+
+float TomlParser::get_float_or(const String &p_key, const float &p_default_value) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return default {1}.", { p_key, p_default_value });
+        return p_default_value;
+    }
+    float f;
+    if (const int8_t code = to_float(node, f); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to cast node at key '{0}' to float. Return false.", { p_key });
+        return {};
+    }
+    return f;
+}
+
+float TomlParser::get_float_at(const Array &p_keys) const {
+    return get_float_at_or(p_keys);
+}
+
+float TomlParser::get_float_at_or(const Array &p_keys, const float &p_default_value) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return default {1}.", { path_as_string(p_keys), p_default_value });
+        return p_default_value;
+    }
+    float f;
+    if (const int8_t code = to_float(node, f); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to cast node at path '{0}' to float. Return false.", { path_as_string(p_keys) });
+        return {};
+    }
+    return f;
+}
+
+TypedArray<float> TomlParser::get_float_arr(const String &p_key) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return empty Array[float].", { p_key });
+        return {};
+    }
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at key '{0}' is not an array. Return empty Array[float].", { p_key });
+        return {};
+    }
+
+    TypedArray<float> result = {};
+    int elm = 0;
+    // node should be an array of arrays
+    for (const auto& value : node.as_array()) {
+        float f;
+        if (const int8_t code = to_float(value, f); code != OK) {
+            log_error_code(code);
+            log("[ERROR] TomlParser : Failed to cast element {0} at key '{1}' to float. Element is ignored.", {elm, p_key});
+            continue;
+        }
+        result.append(f);
+        elm++;
+    }
+    return result;
+}
+
+TypedArray<float> TomlParser::get_float_arr_at(const Array &p_keys) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return empty Array[float].", { path_as_string(p_keys) });
+        return {};
+    }
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at path '{0}' is not an array. Return empty Array[float].", { path_as_string(p_keys) });
+        return {};
+    }
+
+    TypedArray<float> result = {};
+    int elm = 0;
+    // node should be an array of arrays
+    for (const auto& value : node.as_array()) {
+        float f;
+        if (const int8_t code = to_float(value, f); code != OK) {
+            log_error_code(code);
+            log("[ERROR] TomlParser : Failed to cast element {0} at path '{1}' to float. Element is ignored.", {elm, path_as_string(p_keys)});
+            continue;
+        }
+        result.append(f);
+        elm++;
+    }
+    return result;
+}
+
+
+// bool
+// #############################################################################
+
+
+bool TomlParser::get_bool(const String &p_key) const {
+    return get_bool_or(p_key);
+}
+
+bool TomlParser::get_bool_or(const String &p_key, const bool &p_default_value) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return default {1}.", { p_key, p_default_value });
+        return p_default_value;
+    }
+    bool b;
+    if (const int8_t code = to_bool(node, b); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to cast node at key '{0}' to bool. Return false.", { p_key });
+        return {};
+    }
+    return b;
+}
+
+bool TomlParser::get_bool_at(const Array &p_keys) const {
+    return get_bool_at_or(p_keys);
+}
+
+bool TomlParser::get_bool_at_or(const Array &p_keys, const bool &p_default_value) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return default {1}.", { path_as_string(p_keys), p_default_value });
+        return p_default_value;
+    }
+    bool b;
+    if (const int8_t code = to_bool(node, b); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to cast node at path '{0}' to bool. Return false.", { path_as_string(p_keys) });
+        return {};
+    }
+    return b;
+}
+
+TypedArray<bool> TomlParser::get_bool_arr(const String &p_key) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return empty Array[bool].", { p_key });
+        return {};
+    }
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at key '{0}' is not an array. Return empty Array[bool].", { p_key });
+        return {};
+    }
+
+    TypedArray<bool> result = {};
+    int elm = 0;
+    // node should be an array of arrays
+    for (const auto& value : node.as_array()) {
+        bool vec;
+        if (const int8_t code = to_bool(value, vec); code != OK) {
+            log_error_code(code);
+            log("[ERROR] TomlParser : Failed to cast element {0} at key '{1}' to bool. Element is ignored.", {elm, p_key});
+            continue;
+        }
+        result.append(vec);
+        elm++;
+    }
+    return result;
+}
+
+TypedArray<bool> TomlParser::get_bool_arr_at(const Array &p_keys) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return empty Array[bool].", { path_as_string(p_keys) });
+        return {};
+    }
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at path '{0}' is not an array. Return empty Array[bool].", { path_as_string(p_keys) });
+        return {};
+    }
+
+    TypedArray<bool> result = {};
+    int elm = 0;
+    // node should be an array of arrays
+    for (const auto& value : node.as_array()) {
+        bool vec;
+        if (const int8_t code = to_bool(value, vec); code != OK) {
+            log_error_code(code);
+            log("[ERROR] TomlParser : Failed to cast element {0} at path '{1}' to bool. Element is ignored.", {elm, path_as_string(p_keys)});
+            continue;
+        }
+        result.append(vec);
+        elm++;
+    }
+    return result;
+}
+
+
+// Vector2
+// #############################################################################
+
+
+Vector2 TomlParser::get_vec2(const String &p_key) const {
+    return get_vec2_or(p_key);
+}
+
+Vector2 TomlParser::get_vec2_or(const String &p_key, const Vector2 &p_default_value) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return default {1}.", { p_key, p_default_value });
+        return p_default_value;
+    }
+    Vector2 vec;
+    if (const int8_t code = to_vec2(node, vec); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to cast node at key '{0}' to Vector2. Return Vector2.ZERO.", { p_key });
+        return {};
+    }
+    return vec;
+}
+
+Vector2 TomlParser::get_vec2_at(const Array &p_keys) const {
+    return get_vec2_at_or(p_keys);
+}
+
+Vector2 TomlParser::get_vec2_at_or(const Array &p_keys, const Vector2 &p_default_value) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return default {1}.", { path_as_string(p_keys), p_default_value });
+        return p_default_value;
+    }
+    Vector2 vec;
+    if (const int8_t code = to_vec2(node, vec); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to cast node at path '{0}' to Vector2. Return Vector2.ZERO.", { path_as_string(p_keys) });
+        return {};
+    }
+    return vec;
+}
+
+TypedArray<Vector2> TomlParser::get_vec2_arr(const String &p_key) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return empty Array[Vector2].", { p_key });
+        return {};
+    }
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at key '{0}' is not an array. Return empty Array[Vector2].", { p_key });
         return {};
     }
 
     TypedArray<Vector2> result = {};
-    for (const auto vecs = toml::get<std::vector<std::vector<float>>>(node); const auto &v : vecs) {
-        if (v.size() != 2) {
-            log("[ERROR] TomlParser::get_array_vector2 : Expected an array of 2 floats, but found {0}", {v.size()});
+    int elm = 0;
+    // node should be an array of arrays
+    for (const auto& value : node.as_array()) {
+        Vector2 vec;
+        if (const int8_t code = to_vec2(value, vec); code != OK) {
+            log_error_code(code);
+            log("[ERROR] TomlParser : Failed to cast element {0} at key '{1}' to Vector2. Element is ignored.", {elm, p_key});
             continue;
         }
-        result.append(Vector2{ dec_float(node[0]), dec_float(node[1]) });
+        result.append(vec);
+        elm++;
     }
     return result;
 }
 
-Vector2i TomlParser::get_vec2i(const String &p_key) const {
-    auto val = toml::find<std::vector<int>>(*t, to_str(p_key));
-    if (val.empty() or val.size() != 2) {
+TypedArray<Vector2> TomlParser::get_vec2_arr_at(const Array &p_keys) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return empty Array[Vector2].", { path_as_string(p_keys) });
         return {};
     }
-    return { val[0], val[1] };
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at path '{0}' is not an array. Return empty Array[Vector2].", { path_as_string(p_keys) });
+        return {};
+    }
+
+    TypedArray<Vector2> result = {};
+    int elm = 0;
+    // node should be an array of arrays
+    for (const auto& value : node.as_array()) {
+        Vector2 vec;
+        if (const int8_t code = to_vec2(value, vec); code != OK) {
+            log_error_code(code);
+            log("[ERROR] TomlParser : Failed to cast element {0} at path '{1}' to Vector2. Element is ignored.", {elm, path_as_string(p_keys)});
+            continue;
+        }
+        result.append(vec);
+        elm++;
+    }
+    return result;
 }
-Vector2i TomlParser::get_vec2i_or(const String &p_key, const Vector2i p_default_value) const {
-    auto val = toml::find<std::vector<int>>(*t, to_str(p_key));
-    if (val.empty() or val.size() != 2) {
+
+
+
+// Vector2i
+// #############################################################################
+
+
+Vector2i TomlParser::get_vec2i(const String &p_key) const {
+    return get_vec2i_or(p_key);
+}
+
+Vector2i TomlParser::get_vec2i_or(const String &p_key, const Vector2i &p_default_value) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return default {1}.", { p_key, p_default_value });
         return p_default_value;
     }
-    return { val[0], val[1] };
-}
-Vector2i TomlParser::get_vec2i_at(const Array &p_keys) const {
-    auto node = find_recursive(p_keys);
-    if (node.is_empty() or node.size() != 2) {
+    Vector2i vec;
+    if (const int8_t code = to_vec2i(node, vec); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to cast node at key '{0}' to Vector2i. Return Vector2i.ZERO.", { p_key });
         return {};
     }
-    return { dec_int(node[0]), dec_int(node[1]) };
+    return vec;
 }
-TypedArray<Vector2i> TomlParser::get_vec2i_arr_at(const Array &p_keys) const {
-    const toml::value node = find_recursive(p_keys);
-    if (node.is_empty()) {
+
+Vector2i TomlParser::get_vec2i_at(const Array &p_keys) const {
+    return get_vec2i_at_or(p_keys);
+}
+
+Vector2i TomlParser::get_vec2i_at_or(const Array &p_keys, const Vector2i &p_default_value) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return default {1}.", { path_as_string(p_keys), p_default_value });
+        return p_default_value;
+    }
+    Vector2i vec;
+    if (const int8_t code = to_vec2i(node, vec); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to cast node at path '{0}' to Vector2i. Return Vector2i.ZERO.", { path_as_string(p_keys) });
+        return {};
+    }
+    return vec;
+}
+
+TypedArray<Vector2i> TomlParser::get_vec2i_arr(const String &p_key) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return empty Array[Vector2i].", { p_key });
+        return {};
+    }
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at key '{0}' is not an array. Return empty Array[Vector2i].", { p_key });
         return {};
     }
 
     TypedArray<Vector2i> result = {};
-    for (const auto vecs = toml::get<std::vector<std::vector<int>>>(node); const auto &v : vecs) {
-        if (v.size() != 2) {
-            log("[ERROR] TomlParser::get_array_vector2i : Expected an array of 2 ints, but found {0}", {v.size()});
+    int elm = 0;
+    // node should be an array of arrays
+    for (const auto& value : node.as_array()) {
+        Vector2i vec;
+        if (const int8_t code = to_vec2i(value, vec); code != OK) {
+            log_error_code(code);
+            log("[ERROR] TomlParser : Failed to cast element {0} at key '{1}' to Vector2i. Element is ignored.", {elm, p_key});
             continue;
         }
-        result.append(Vector2i{ dec_int(node[0]), dec_int(node[1]) });
+        result.append(vec);
+        elm++;
     }
     return result;
 }
 
-Vector3 TomlParser::get_vec3(const String &p_key) const {
-    auto val = toml::find<std::vector<float>>(*t, to_str(p_key));
-    if (val.empty() or val.size() != 3) {
+TypedArray<Vector2i> TomlParser::get_vec2i_arr_at(const Array &p_keys) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return empty Array[Vector2i].", { path_as_string(p_keys) });
         return {};
     }
-    return { val[0], val[1], val[2] };
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at path '{0}' is not an array. Return empty Array[Vector2i].", { path_as_string(p_keys) });
+        return {};
+    }
+
+    TypedArray<Vector2i> result = {};
+    int elm = 0;
+    // node should be an array of arrays
+    for (const auto& value : node.as_array()) {
+        Vector2i vec;
+        if (const int8_t code = to_vec2i(value, vec); code != OK) {
+            log_error_code(code);
+            log("[ERROR] TomlParser : Failed to cast element {0} at path '{1}' to Vector2i. Element is ignored.", {elm, path_as_string(p_keys)});
+            continue;
+        }
+        result.append(vec);
+        elm++;
+    }
+    return result;
 }
-Vector3 TomlParser::get_vec3_or(const String &p_key, const Vector3 p_default_value) const {
-    auto val = toml::find<std::vector<float>>(*t, to_str(p_key));
-    if (val.empty() or val.size() != 3) {
+
+
+// Vector3
+// #############################################################################
+
+
+Vector3 TomlParser::get_vec3(const String &p_key) const {
+    return get_vec3_or(p_key);
+}
+
+Vector3 TomlParser::get_vec3_or(const String &p_key, const Vector3 &p_default_value) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return default {1}.", { p_key, p_default_value });
         return p_default_value;
     }
-    return { val[0], val[1], val[2] };
-}
-Vector3 TomlParser::get_vec3_at(const Array &p_keys) const {
-    auto node = find_recursive(p_keys);
-    if (node.is_empty() or node.size() != 3) {
+    Vector3 vec;
+    if (const int8_t code = to_vec3(node, vec); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to cast node at key '{0}' to Vector3. Return Vector3.ZERO.", { p_key });
         return {};
     }
-    return { dec_float(node[0]), dec_float(node[1]), dec_float(node[2]) };
+    return vec;
 }
-TypedArray<Vector3> TomlParser::get_vec3_arr_at(const Array &p_keys) const {
-    const toml::value node = find_recursive(p_keys);
-    if (node.is_empty()) {
+
+Vector3 TomlParser::get_vec3_at(const Array &p_keys) const {
+    return get_vec3_at_or(p_keys);
+}
+
+Vector3 TomlParser::get_vec3_at_or(const Array &p_keys, const Vector3 &p_default_value) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return default {1}.", { path_as_string(p_keys), p_default_value });
+        return p_default_value;
+    }
+    Vector3 vec;
+    if (const int8_t code = to_vec3(node, vec); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to cast node at path '{0}' to Vector3. Return Vector3.ZERO.", { path_as_string(p_keys) });
+        return {};
+    }
+    return vec;
+}
+
+TypedArray<Vector3> TomlParser::get_vec3_arr(const String &p_key) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return empty Array[Vector3].", { p_key });
+        return {};
+    }
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at key '{0}' is not an array. Return empty Array[Vector3].", { p_key });
         return {};
     }
 
     TypedArray<Vector3> result = {};
-    for (const auto vecs = toml::get<std::vector<std::vector<float>>>(node); const auto &v : vecs) {
-        if (v.size() != 3) {
-            log("[ERROR] TomlParser::get_array_vector3 : Expected an array of 3 floats, but found {0}", {v.size()});
+    int elm = 0;
+    // node should be an array of arrays
+    for (const auto& value : node.as_array()) {
+        Vector3 vec;
+        if (const int8_t code = to_vec3(value, vec); code != OK) {
+            log_error_code(code);
+            log("[ERROR] TomlParser : Failed to cast element {0} at key '{1}' to Vector3. Element is ignored.", {elm, p_key});
             continue;
         }
-        result.append(Vector3{ dec_float(node[0]), dec_float(node[1]), dec_float(node[2]) });
+        result.append(vec);
+        elm++;
     }
     return result;
 }
 
-Vector3i TomlParser::get_vec3i(const String &p_key) const {
-    auto val = toml::find<std::vector<int>>(*t, to_str(p_key));
-    if (val.empty() or val.size() != 3) {
+TypedArray<Vector3> TomlParser::get_vec3_arr_at(const Array &p_keys) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return empty Array[Vector3].", { path_as_string(p_keys) });
         return {};
     }
-    return { val[0], val[1], val[2] };
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at path '{0}' is not an array. Return empty Array[Vector3].", { path_as_string(p_keys) });
+        return {};
+    }
+
+    TypedArray<Vector3> result = {};
+    int elm = 0;
+    // node should be an array of arrays
+    for (const auto& value : node.as_array()) {
+        Vector3 vec;
+        if (const int8_t code = to_vec3(value, vec); code != OK) {
+            log_error_code(code);
+            log("[ERROR] TomlParser : Failed to cast element {0} at path '{1}' to Vector3. Element is ignored.", {elm, path_as_string(p_keys)});
+            continue;
+        }
+        result.append(vec);
+        elm++;
+    }
+    return result;
 }
-Vector3i TomlParser::get_vec3i_or(const String &p_key, const Vector3i p_default_value) const {
-    auto val = toml::find<std::vector<int>>(*t, to_str(p_key));
-    if (val.empty() or val.size() != 3) {
+
+
+// Vector3i
+// #############################################################################
+
+
+Vector3i TomlParser::get_vec3i(const String &p_key) const {
+    return get_vec3i_or(p_key);
+}
+
+Vector3i TomlParser::get_vec3i_or(const String &p_key, const Vector3i &p_default_value) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return default {1}.", { p_key, p_default_value });
         return p_default_value;
     }
-    return { val[0], val[1], val[2] };
-}
-Vector3i TomlParser::get_vec3i_at(const Array &p_keys) const {
-    auto node = find_recursive(p_keys);
-    if (node.is_empty() or node.size() != 3) {
+    Vector3i vec;
+    if (const int8_t code = to_vec3i(node, vec); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to cast node at key '{0}' to Vector3i. Return Vector3i.ZERO.", { p_key });
         return {};
     }
-    return { dec_int(node[0]), dec_int(node[1]), dec_int(node[2])};
+    return vec;
 }
-TypedArray<Vector3i> TomlParser::get_vec3i_arr_at(const Array &p_keys) const {
-    const toml::value node = find_recursive(p_keys);
-    if (node.is_empty()) {
+
+Vector3i TomlParser::get_vec3i_at(const Array &p_keys) const {
+    return get_vec3i_at_or(p_keys);
+}
+
+Vector3i TomlParser::get_vec3i_at_or(const Array &p_keys, const Vector3i &p_default_value) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return default {1}.", { path_as_string(p_keys), p_default_value });
+        return p_default_value;
+    }
+    Vector3i vec;
+    if (const int8_t code = to_vec3i(node, vec); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to cast node at path '{0}' to Vector3i. Return Vector3i.ZERO.", { path_as_string(p_keys) });
+        return {};
+    }
+    return vec;
+}
+
+TypedArray<Vector3i> TomlParser::get_vec3i_arr(const String &p_key) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return empty Array[Vector3i].", { p_key });
+        return {};
+    }
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at key '{0}' is not an array. Return empty Array[Vector3i].", { p_key });
         return {};
     }
 
     TypedArray<Vector3i> result = {};
-    for (const auto vecs = toml::get<std::vector<std::vector<int>>>(node); const auto &v : vecs) {
-        if (v.size() != 3) {
-            log("[ERROR] TomlParser::get_array_vector3i : Expected an array of 3 ints, but found {0}", {v.size()});
+    int elm = 0;
+    // node should be an array of arrays
+    for (const auto& value : node.as_array()) {
+        Vector3i vec;
+        if (const int8_t code = to_vec3i(value, vec); code != OK) {
+            log_error_code(code);
+            log("[ERROR] TomlParser : Failed to cast element {0} at key '{1}' to Vector3i. Element is ignored.", {elm, p_key});
             continue;
         }
-        result.append(Vector3i{ dec_int(node[0]), dec_int(node[1]), dec_int(node[2])});
+        result.append(vec);
+        elm++;
     }
     return result;
 }
 
-Color TomlParser::get_color(const String &p_key) const {
-    auto &val = toml::find<std::string>(*t, to_str(p_key));
-    if (val.empty()) {
+TypedArray<Vector3i> TomlParser::get_vec3i_arr_at(const Array &p_keys) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return empty Array[Vector3i].", { path_as_string(p_keys) });
         return {};
     }
-    Array result = {};
-    to_array(val, result);
-    return {result[0], result[1], result[2], result[3]};
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at path '{0}' is not an array. Return empty Array[Vector3i].", { path_as_string(p_keys) });
+        return {};
+    }
+
+    TypedArray<Vector3i> result = {};
+    int elm = 0;
+    // node should be an array of arrays
+    for (const auto& value : node.as_array()) {
+        Vector3i vec;
+        if (const int8_t code = to_vec3i(value, vec); code != OK) {
+            log_error_code(code);
+            log("[ERROR] TomlParser : Failed to cast element {0} at path '{1}' to Vector3i. Element is ignored.", {elm, path_as_string(p_keys)});
+            continue;
+        }
+        result.append(vec);
+        elm++;
+    }
+    return result;
 }
-Color TomlParser::get_color_or(const String &p_key, const Color p_default_value) const {
-    auto &val = toml::find<std::string>(*t, to_str(p_key));
-    if (val.empty()) {
+
+
+// Color
+// #############################################################################
+
+
+Color TomlParser::get_color(const String &p_key) const {
+    return get_color_or(p_key);
+}
+
+Color TomlParser::get_color_or(const String &p_key, const Color& p_default_value) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return default {1}.", { p_key, p_default_value });
         return p_default_value;
     }
-    Array result = {};
-    to_array(val, result);
-    return {result[0], result[1], result[2], result[3]};
-}
-Color TomlParser::get_color_at(const Array &p_keys) const {
-    const toml::value node = find_recursive(p_keys);
-    if (node.is_empty() or !node.is_array()) {
-        return Color{0,0,0,0};
+
+    Color color;
+    if (const int8_t code = to_color(node, color); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to cast node at key '{0}' to Color. Return Color {0,0,0,0}.", { p_key });
+        return {0,0,0,0};
     }
-    Array result = {};
-    to_array(node, result);
-    return {result[0], result[1], result[2], result[3]};
+
+    return color;
 }
-TypedArray<Color> TomlParser::get_color_arr_at(const Array &p_keys) const {
-    const toml::value node = find_recursive(p_keys);
-    if (node.is_empty()) {
+
+Color TomlParser::get_color_at(const Array &p_keys) const {
+    return get_color_at_or(p_keys);
+}
+
+Color TomlParser::get_color_at_or(const Array &p_keys, const Color& p_default_value) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return default {1}.", { path_as_string(p_keys), p_default_value });
+        return p_default_value;
+    }
+
+    Color color;
+    if (const int8_t code = to_color(node, color); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to cast node at path '{0}' to Color. Return default {1}.", { path_as_string(p_keys), p_default_value });
+        return {0,0,0,0};
+    }
+
+    return color;
+}
+
+TypedArray<Color> TomlParser::get_color_arr(const String &p_key) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return empty Array[Color].", { p_key });
+        return {};
+    }
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at key '{0}' is not an array. Return empty Array[Color].", { p_key });
         return {};
     }
 
     TypedArray<Color> result = {};
-    for (const auto vecs = toml::get<std::vector<std::string>>(node); const auto &v : vecs) {
-        Array arr = {};
-        to_array(v, arr);
-        result.append(Color(arr[0], arr[1], arr[2], arr[3]));
+    int elm = 0;
+    // node should be an array of arrays
+    for (const auto& value : node.as_array()) {
+        Color color;
+        if (const int8_t code = to_color(value, color); code != OK) {
+            log_error_code(code);
+            log("[ERROR] TomlParser : Failed to cast element {0} at key '{1}' to Color. Element is ignored.", {elm, p_key});
+            continue;
+        }
+        result.append(color);
+        elm++;
     }
     return result;
 }
 
-Dictionary TomlParser::get_table(const String &p_key) const {
-    const std::string key = to_str(p_key);
-    if (!t->contains(key) || !t->at(key).is_table()) {
-        log("[ERROR] TomlParser::get_table : Cannot find table with key '{0}'. Return empty Dictionary.", {p_key});
+TypedArray<Color> TomlParser::get_color_arr_at(const Array &p_keys) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return empty Array[Color].", { path_as_string(p_keys) });
         return {};
     }
-    Dictionary result = {};
-    to_dictionary(t->at(key), result);
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at path '{0}' is not an array. Return empty Array[Color].", { path_as_string(p_keys) });
+        return {};
+    }
+
+    TypedArray<Color> result = {};
+    int elm = 0;
+    // node should be an array of arrays
+    for (const auto& value : node.as_array()) {
+        Color color;
+        if (const int8_t code = to_color(value, color); code != OK) {
+            log_error_code(code);
+            log("[ERROR] TomlParser : Failed to cast element {0} at path '{1}' to Color. Element is ignored.", {elm, path_as_string(p_keys)});
+            continue;
+        }
+        result.append(color);
+        elm++;
+    }
     return result;
 }
-Dictionary TomlParser::get_table_at(const Array &p_keys) const {
-    const toml::value node = find_recursive(p_keys);
-    if (node.is_empty() or !node.is_table()) {
+
+
+// Table
+// #############################################################################
+
+
+Dictionary TomlParser::get_table(const String &p_key) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return empty Dictionary.", { p_key });
         return {};
     }
+
+    if (!node.is_table()) {
+        log("[ERROR] TomlParser : The key '{0}' is not a table. Return empty Dictionary.", {p_key});
+        return {};
+    }
+
+    Dictionary result = {};
+    to_dictionary(node, result);
+    return result;
+}
+
+Dictionary TomlParser::get_table_at(const Array &p_keys) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return empty Dictionary.", { path_as_string(p_keys) });
+        return {};
+    }
+
+    if (!node.is_table()) {
+        log("[ERROR] TomlParser : The node at path '{0}' is not a table. Return empty Dictionary.", { path_as_string(p_keys) });
+        return {};
+    }
+
     Dictionary result = {};
     to_dictionary(node, result);
     return result;
 }
 
 TypedArray<String> TomlParser::get_table_keys(const String &p_key) const {
-    const std::string key = to_str(p_key);
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return empty Dictionary.", { p_key });
+        return {};
+    }
+
+    if (!node.is_table()) {
+        log("[ERROR] TomlParser : The node at key '{0}' is not a table. Return empty Dictionary.", { p_key });
+        return {};
+    }
+
     TypedArray<String> result = {};
-    if (!t->contains(key)) {
-        return result;
-    }
-    if (!t->at(key).is_table()) {
-        return result;
-    }
-    for(const auto& [k, v] : t->at(key).as_table()) {
+    for (const auto &k: node.as_table() | std::views::keys) {
         result.append(dec_string(k));
     }
     return result;
 }
 
+
+// Array
+// #############################################################################
+
+
 Array TomlParser::get_array(const String &p_key) const {
-    const std::string key = to_str(p_key);
-    if (!t->contains(key) || !t->at(key).is_array()) {
-        log("[ERROR] TomlParser::get_array : Cannot find array with key '{0}'. Return empty Array.", {p_key});
+    toml::value node;
+    if (const int8_t code = get_node(p_key, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at key '{0}'. Return empty Array.", { p_key });
         return {};
     }
-    Array result = {};
-    to_array(t->at(key), result);
-    return result;
-}
-Array TomlParser::get_array_at(const Array &p_keys) const {
-    const toml::value node = find_recursive(p_keys);
-    if (node.is_empty() or !node.is_array()) {
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at key '{0}' is not an array. Return empty Array.", { p_key });
         return {};
     }
+
     Array result = {};
     to_array(node, result);
     return result;
 }
+
+Array TomlParser::get_array_at(const Array &p_keys) const {
+    toml::value node;
+    if (const int8_t code = get_node(p_keys, node); code != OK) {
+        log_error_code(code);
+        log("[ERROR] TomlParser : Failed to get node at path '{0}'. Return empty Array.", { path_as_string(p_keys) });
+        return {};
+    }
+
+    if (!node.is_array()) {
+        log("[ERROR] TomlParser : The node at path '{0}' is not an array. Return empty Array.", { path_as_string(p_keys) });
+        return {};
+    }
+
+    Array result = {};
+    to_array(node, result);
+    return result;
+}
+
+
 
 void TomlParser::to_dictionary(const toml::basic_value<toml::type_config> &p_table, Dictionary &p_dict) {
     for(const auto& [k, v] : p_table.as_table()) {
@@ -482,6 +1254,121 @@ void TomlParser::to_array(const toml::basic_value<toml::type_config> &p_value, A
     }
 }
 
+int8_t TomlParser::to_string(const toml::basic_value<toml::type_config> &p_value, String &p_string) {
+    if (!p_value.is_string()) {
+        return ERR_INCORRECT_TYPE;
+    }
+    p_string = dec_string(p_value.as_string());
+    return OK;
+}
+
+int8_t TomlParser::to_int(const toml::basic_value<toml::type_config> &p_value, int64_t &p_int) {
+    if (!p_value.is_integer()) {
+        return ERR_INCORRECT_TYPE;
+    }
+    p_int = p_value.as_integer();
+    return OK;
+}
+
+int8_t TomlParser::to_float(const toml::basic_value<toml::type_config> &p_value, float &p_float) {
+    if (!p_value.is_floating()) {
+        return ERR_INCORRECT_TYPE;
+    }
+    p_float = p_value.as_floating();
+    return OK;
+}
+
+int8_t TomlParser::to_bool(const toml::basic_value<toml::type_config> &p_value, bool &p_bool) {
+    if (!p_value.is_boolean()) {
+        return ERR_INCORRECT_TYPE;
+    }
+    p_bool = p_value.as_boolean();
+    return OK;
+}
+
+int8_t TomlParser::to_color(const toml::basic_value<toml::type_config> &p_value, Color &p_color) {
+    if (!p_value.is_array()) {
+        return ERR_INCORRECT_TYPE;
+    }
+    const auto& arr = p_value.as_array();
+    if (arr.size() < 3 || arr.size() > 4) {
+        return ERR_INCORRECT_FORMAT;
+    }
+    float alpha = 1.0f;
+    if (arr.size() == 4) {
+        alpha = dec_float(arr[3]);
+    }
+    p_color = {dec_float(arr[0]), dec_float(arr[1]), dec_float(arr[2]), alpha};
+    return OK;
+}
+
+int8_t TomlParser::to_vec2(const toml::basic_value<toml::type_config> &p_value, Vector2 &p_vec2) {
+    if (!p_value.is_array()) {
+        return ERR_INCORRECT_TYPE;
+    }
+    if (p_value.size() != 2) {
+        return ERR_INCORRECT_FORMAT;
+    }
+    p_vec2 = {dec_float(p_value[0]), dec_float(p_value[1])};
+    return OK;
+}
+
+int8_t TomlParser::to_vec2i(const toml::basic_value<toml::type_config> &p_value, Vector2i &p_vec2i) {
+    if (!p_value.is_array()) {
+        return ERR_INCORRECT_TYPE;
+    }
+    if (p_value.size() != 3) {
+        return ERR_INCORRECT_FORMAT;
+    }
+    p_vec2i = {dec_int(p_value[0]), dec_int(p_value[1])};
+    return OK;
+}
+
+int8_t TomlParser::to_vec3(const toml::basic_value<toml::type_config> &p_value, Vector3 &p_vec3) {
+    if (!p_value.is_array()) {
+        return ERR_INCORRECT_TYPE;
+    }
+    if (p_value.size() != 3) {
+        return ERR_INCORRECT_FORMAT;
+    }
+    p_vec3 = {dec_float(p_value[0]), dec_float(p_value[1]), dec_float(p_value[2])};
+    return OK;
+}
+
+int8_t TomlParser::to_vec3i(const toml::basic_value<toml::type_config> &p_value, Vector3i &p_vec3i) {
+    if (!p_value.is_array()) {
+        return ERR_INCORRECT_TYPE;
+    }
+    if (p_value.size() != 3) {
+        return ERR_INCORRECT_FORMAT;
+    }
+    p_vec3i = {dec_int(p_value[0]), dec_int(p_value[1]), dec_int(p_value[2])};
+    return OK;
+}
+
+int8_t TomlParser::get_node(const String &p_key, toml::value &node) const {
+    if (p_key.is_empty()) {
+        return ERR_KEY_EMPTY;
+    }
+    if (!t->contains(to_str(p_key))) {
+        return ERR_KEY_NOT_FOUND;
+    }
+    node = t->at(to_str(p_key));
+    return OK;
+}
+
+int8_t TomlParser::get_node(const Array &p_keys, toml::value &node) const {
+    if (p_keys.size() == 0) {
+        return ERR_KEY_MISSING;
+    }
+    const toml::value n = find_recursive(p_keys);
+    if (n.is_empty()) {
+        return ERR_NODE_EMPTY;
+    }
+    node = n;
+    return OK;
+}
+
 bool TomlParser::has_path(const Array &p_keys) const {
     std::vector<toml::value> nodes = {};
     const auto &doc = *t;
@@ -536,6 +1423,20 @@ toml::value TomlParser::find_recursive(const Array &p_keys) const {
 
     // Should return a reference instead?
     return nodes[nodes.size() - 1];
+}
+
+String TomlParser::path_as_string(const Array &p_keys) {
+    std::ostringstream oss;
+    int i = 0;
+    const auto num_keys = p_keys.size();
+    for (const auto& k : p_keys) {
+        oss << to_str(k);
+        if (i < num_keys - 1) {
+            oss << "/";
+        }
+        i++;
+    }
+    return dec_string(oss.str());
 }
 
 template<typename T>
