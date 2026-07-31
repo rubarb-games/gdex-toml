@@ -33,10 +33,14 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
     $<$<CONFIG:Debug>:DEBUG_TOML>
 )
 
+target_link_options(${PROJECT_NAME} PRIVATE -static -static-libgcc -static-libstdc++)
+
 if (MSVC)
     target_compile_options(godot-cpp PRIVATE "/MP")
     target_compile_options(${PROJECT_NAME} PRIVATE "/MP")
     set(CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD ON)
+#else ()
+#    target_compile_options(${PROJECT_NAME} PRIVATE -static -static-libgcc -static-libstdc++)
 endif()
 
 target_link_libraries(${PROJECT_NAME}
